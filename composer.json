@@ -1,5 +1,5 @@
 {
-  "name": "amirdev-byte/flask-php",
+  "name": "amirdev-byte/phlask",
   "description": "A minimal and elegant microframework for building APIs in PHP — inspired by Flask, designed for simplicity and speed.",
   "type": "library",
   "license": "MIT",
