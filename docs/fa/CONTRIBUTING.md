@@ -1,6 +1,7 @@
 # راهنمای مشارکت در فلسک‌پی‌اچ‌پی
 
-از اینکه علاقه‌مند به مشارکت در توسعه فلسک‌پی‌اچ‌پی هستید، بسیار سپاسگزاریم! این راهنما به شما کمک می‌کند تا با فرآیند مشارکت آشنا شوید.
+از اینکه علاقه‌مند به مشارکت در توسعه فلسک‌پی‌اچ‌پی هستید، بسیار سپاسگزاریم! این راهنما به شما کمک می‌کند تا با فرآیند
+مشارکت آشنا شوید.
 
 ## پیش‌نیازها
 
@@ -22,19 +23,19 @@
 
 برای شروع، ابتدا باید یک فورک از مخزن اصلی ایجاد کنید:
 
-1. به [صفحه مخزن فلسک‌پی‌اچ‌پی](https://github.com/amirdev-byte/flask-php) در گیت‌هاب بروید
+1. به [صفحه مخزن فلسک‌پی‌اچ‌پی](https://github.com/amirdev-byte/phlask) در گیت‌هاب بروید
 2. روی دکمه "Fork" در بالای صفحه کلیک کنید
 3. فورک را به سیستم خود کلون کنید:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/flask-php.git
-cd flask-php
+git clone https://github.com/AmirDev-byte/phlask.git
+cd phlask
 ```
 
 4. مخزن اصلی را به عنوان "upstream" اضافه کنید:
 
 ```bash
-git remote add upstream https://github.com/amirdev-byte/flask-php.git
+git remote add upstream https://github.com/amirdev-byte/phlask.git
 ```
 
 ## راه‌اندازی محیط توسعه
@@ -111,7 +112,8 @@ git push origin feature/my-new-feature
 
 لطفاً در هنگام توسعه کد به استانداردهای زیر پایبند باشید:
 
-- از استاندارد [PSR-1](https://www.php-fig.org/psr/psr-1/) و [PSR-12](https://www.php-fig.org/psr/psr-12/) برای استایل کد استفاده کنید
+- از استاندارد [PSR-1](https://www.php-fig.org/psr/psr-1/) و [PSR-12](https://www.php-fig.org/psr/psr-12/) برای استایل
+  کد استفاده کنید
 - از استاندارد [PSR-4](https://www.php-fig.org/psr/psr-4/) برای اتولودینگ استفاده کنید
 - اگر اینترفیس‌های PSR دیگری را پیاده‌سازی می‌کنید، از استانداردهای مرتبط پیروی کنید
 - برای هر کلاس و متد، PHPDoc بنویسید
@@ -128,9 +130,9 @@ git push origin feature/my-new-feature
 نمونه یک تست ساده:
 
 ```php
-namespace Tests\FlaskPHP\Http;
+namespace Tests\PLHask\Http;
 
-use FlaskPHP\Http\Request;
+use PLHask\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 class RequestTest extends TestCase

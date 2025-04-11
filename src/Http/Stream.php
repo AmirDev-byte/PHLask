@@ -96,6 +96,62 @@ class Stream implements StreamInterface
     /**
      * @inheritDoc
      */
+    public function isSeekable(): bool
+    {
+        return $this->seekable;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function rewind(): void
+    {
+        $this->seek(0);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function seek($offset, $whence = SEEK_SET): void
+    {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
+
+        if (!$this->seekable) {
+            throw new \RuntimeException('Stream is not seekable');
+        }
+
+        if (fseek($this->stream, $offset, $whence) === -1) {
+            throw new \RuntimeException('Unable to seek to stream position ' . $offset);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getContents(): string
+    {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
+
+        if (!$this->readable) {
+            throw new \RuntimeException('Cannot read from non-readable stream');
+        }
+
+        $contents = stream_get_contents($this->stream);
+
+        if ($contents === false) {
+            throw new \RuntimeException('Unable to read stream contents');
+        }
+
+        return $contents;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function close(): void
     {
         if (isset($this->stream)) {
@@ -178,40 +234,6 @@ class Stream implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function isSeekable(): bool
-    {
-        return $this->seekable;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function seek($offset, $whence = SEEK_SET): void
-    {
-        if (!isset($this->stream)) {
-            throw new \RuntimeException('Stream is detached');
-        }
-
-        if (!$this->seekable) {
-            throw new \RuntimeException('Stream is not seekable');
-        }
-
-        if (fseek($this->stream, $offset, $whence) === -1) {
-            throw new \RuntimeException('Unable to seek to stream position ' . $offset);
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function rewind(): void
-    {
-        $this->seek(0);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function isWritable(): bool
     {
         return $this->writable;
@@ -267,28 +289,6 @@ class Stream implements StreamInterface
         }
 
         return $data;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getContents(): string
-    {
-        if (!isset($this->stream)) {
-            throw new \RuntimeException('Stream is detached');
-        }
-
-        if (!$this->readable) {
-            throw new \RuntimeException('Cannot read from non-readable stream');
-        }
-
-        $contents = stream_get_contents($this->stream);
-
-        if ($contents === false) {
-            throw new \RuntimeException('Unable to read stream contents');
-        }
-
-        return $contents;
     }
 
     /**

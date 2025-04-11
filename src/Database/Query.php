@@ -77,15 +77,16 @@ class QueryBuilder
     }
 
     /**
-     * انتخاب ستون‌ها
+     * افزودن شرط where با رابطه منطقی OR
      *
-     * @param string|array $columns ستون‌های مورد نظر
+     * @param string $column نام ستون
+     * @param string|null $operator عملگر
+     * @param mixed $value مقدار
      * @return self
      */
-    public function select($columns = ['*']): self
+    public function orWhere(string $column, $operator = null, $value = null): self
     {
-        $this->selects = is_array($columns) ? $columns : func_get_args();
-        return $this;
+        return $this->where($column, $operator, $value, 'OR');
     }
 
     /**
@@ -123,16 +124,15 @@ class QueryBuilder
     }
 
     /**
-     * افزودن شرط where با رابطه منطقی OR
+     * افزودن شرط where برای جستجوی شبیه (LIKE) با رابطه منطقی OR
      *
      * @param string $column نام ستون
-     * @param string|null $operator عملگر
-     * @param mixed $value مقدار
+     * @param string $value مقدار
      * @return self
      */
-    public function orWhere(string $column, $operator = null, $value = null): self
+    public function orWhereLike(string $column, string $value): self
     {
-        return $this->where($column, $operator, $value, 'OR');
+        return $this->whereLike($column, $value, 'OR');
     }
 
     /**
@@ -149,15 +149,15 @@ class QueryBuilder
     }
 
     /**
-     * افزودن شرط where برای جستجوی شبیه (LIKE) با رابطه منطقی OR
+     * افزودن شرط where برای مقادیر غیر null
      *
      * @param string $column نام ستون
-     * @param string $value مقدار
+     * @param string $boolean رابطه منطقی (AND/OR)
      * @return self
      */
-    public function orWhereLike(string $column, string $value): self
+    public function whereNotNull(string $column, string $boolean = 'AND'): self
     {
-        return $this->whereLike($column, $value, 'OR');
+        return $this->whereNull($column, $boolean, true);
     }
 
     /**
@@ -181,15 +181,16 @@ class QueryBuilder
     }
 
     /**
-     * افزودن شرط where برای مقادیر غیر null
+     * افزودن شرط where برای مقادیر خارج از یک مجموعه (NOT IN)
      *
      * @param string $column نام ستون
+     * @param array $values مقادیر
      * @param string $boolean رابطه منطقی (AND/OR)
      * @return self
      */
-    public function whereNotNull(string $column, string $boolean = 'AND'): self
+    public function whereNotIn(string $column, array $values, string $boolean = 'AND'): self
     {
-        return $this->whereNull($column, $boolean, true);
+        return $this->whereIn($column, $values, $boolean, true);
     }
 
     /**
@@ -224,16 +225,16 @@ class QueryBuilder
     }
 
     /**
-     * افزودن شرط where برای مقادیر خارج از یک مجموعه (NOT IN)
+     * افزودن شرط where برای مقادیر خارج از یک محدوده (NOT BETWEEN)
      *
      * @param string $column نام ستون
-     * @param array $values مقادیر
+     * @param array $values مقادیر [min, max]
      * @param string $boolean رابطه منطقی (AND/OR)
      * @return self
      */
-    public function whereNotIn(string $column, array $values, string $boolean = 'AND'): self
+    public function whereNotBetween(string $column, array $values, string $boolean = 'AND'): self
     {
-        return $this->whereIn($column, $values, $boolean, true);
+        return $this->whereBetween($column, $values, $boolean, true);
     }
 
     /**
@@ -271,16 +272,17 @@ class QueryBuilder
     }
 
     /**
-     * افزودن شرط where برای مقادیر خارج از یک محدوده (NOT BETWEEN)
+     * افزودن دستور LEFT JOIN
      *
-     * @param string $column نام ستون
-     * @param array $values مقادیر [min, max]
-     * @param string $boolean رابطه منطقی (AND/OR)
+     * @param string $table نام جدول
+     * @param string $first ستون اول
+     * @param string $operator عملگر
+     * @param string $second ستون دوم
      * @return self
      */
-    public function whereNotBetween(string $column, array $values, string $boolean = 'AND'): self
+    public function leftJoin(string $table, string $first, string $operator, string $second): self
     {
-        return $this->whereBetween($column, $values, $boolean, true);
+        return $this->join($table, $first, $operator, $second, 'LEFT');
     }
 
     /**
@@ -307,20 +309,6 @@ class QueryBuilder
     }
 
     /**
-     * افزودن دستور LEFT JOIN
-     *
-     * @param string $table نام جدول
-     * @param string $first ستون اول
-     * @param string $operator عملگر
-     * @param string $second ستون دوم
-     * @return self
-     */
-    public function leftJoin(string $table, string $first, string $operator, string $second): self
-    {
-        return $this->join($table, $first, $operator, $second, 'LEFT');
-    }
-
-    /**
      * افزودن دستور RIGHT JOIN
      *
      * @param string $table نام جدول
@@ -332,6 +320,17 @@ class QueryBuilder
     public function rightJoin(string $table, string $first, string $operator, string $second): self
     {
         return $this->join($table, $first, $operator, $second, 'RIGHT');
+    }
+
+    /**
+     * افزودن دستور ORDER BY با جهت نزولی
+     *
+     * @param string $column نام ستون
+     * @return self
+     */
+    public function orderByDesc(string $column): self
+    {
+        return $this->orderBy($column, 'DESC');
     }
 
     /**
@@ -355,17 +354,6 @@ class QueryBuilder
         ];
 
         return $this;
-    }
-
-    /**
-     * افزودن دستور ORDER BY با جهت نزولی
-     *
-     * @param string $column نام ستون
-     * @return self
-     */
-    public function orderByDesc(string $column): self
-    {
-        return $this->orderBy($column, 'DESC');
     }
 
     /**
@@ -398,6 +386,22 @@ class QueryBuilder
     }
 
     /**
+     * صفحه‌بندی نتایج
+     *
+     * @param int $page شماره صفحه
+     * @param int $perPage تعداد رکورد در هر صفحه
+     * @return self
+     */
+    public function paginate(int $page, int $perPage = 15): self
+    {
+        $page = max(1, $page);
+        $this->limit($perPage);
+        $this->offset(($page - 1) * $perPage);
+
+        return $this;
+    }
+
+    /**
      * افزودن دستور LIMIT
      *
      * @param int $limit تعداد رکوردها
@@ -422,19 +426,147 @@ class QueryBuilder
     }
 
     /**
-     * صفحه‌بندی نتایج
+     * درج داده در جدول
      *
-     * @param int $page شماره صفحه
-     * @param int $perPage تعداد رکورد در هر صفحه
-     * @return self
+     * @param array $data داده‌های برای درج
+     * @return int آیدی آخرین رکورد درج شده
      */
-    public function paginate(int $page, int $perPage = 15): self
+    public function insert(array $data): int
     {
-        $page = max(1, $page);
-        $this->limit($perPage);
-        $this->offset(($page - 1) * $perPage);
+        return $this->connection->insert($this->table, $data);
+    }
 
-        return $this;
+    /**
+     * به‌روزرسانی داده‌ها
+     *
+     * @param array $data داده‌های برای به‌روزرسانی
+     * @return int تعداد رکوردهای تغییر یافته
+     */
+    public function update(array $data): int
+    {
+        $where = $this->buildWheres();
+        $where = str_replace('WHERE ', '', $where);
+
+        if (empty($where)) {
+            throw new \InvalidArgumentException('Update requires a WHERE clause. Call where() method first.');
+        }
+
+        return $this->connection->update($this->table, $data, $where, $this->params);
+    }
+
+    /**
+     * ساخت بخش WHERE کوئری
+     *
+     * @return string
+     */
+    protected function buildWheres(): string
+    {
+        if (empty($this->wheres)) {
+            return '';
+        }
+
+        $sql = [];
+
+        foreach ($this->wheres as $i => $where) {
+            $boolean = $i === 0 ? '' : $where['boolean'] . ' ';
+
+            switch ($where['type']) {
+                case 'basic':
+                    $sql[] = $boolean . $where['column'] . ' ' . $where['operator'] . ' ' . $where['param'];
+                    break;
+
+                case 'null':
+                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' IS NOT NULL' : ' IS NULL');
+                    break;
+
+                case 'in':
+                    $placeholders = implode(', ', $where['params']);
+                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' NOT IN ' : ' IN ') . '(' . $placeholders . ')';
+                    break;
+
+                case 'between':
+                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' NOT BETWEEN ' : ' BETWEEN ') . $where['min_param'] . ' AND ' . $where['max_param'];
+                    break;
+            }
+        }
+
+        return 'WHERE ' . implode(' ', $sql);
+    }
+
+    /**
+     * حذف داده‌ها
+     *
+     * @return int تعداد رکوردهای حذف شده
+     */
+    public function delete(): int
+    {
+        $where = $this->buildWheres();
+        $where = str_replace('WHERE ', '', $where);
+
+        if (empty($where)) {
+            throw new \InvalidArgumentException('Delete requires a WHERE clause. Call where() method first.');
+        }
+
+        return $this->connection->delete($this->table, $where, $this->params);
+    }
+
+    /**
+     * بررسی وجود حداقل یک رکورد
+     *
+     * @return bool
+     */
+    public function exists(): bool
+    {
+        return $this->count() > 0;
+    }
+
+    /**
+     * اجرای کوئری و دریافت تعداد نتایج
+     *
+     * @param string $column نام ستون (پیش‌فرض: *)
+     * @return int
+     */
+    public function count(string $column = '*'): int
+    {
+        $original = $this->selects;
+        $this->selects = ["COUNT({$column}) as count"];
+
+        $result = $this->first();
+        $this->selects = $original;
+
+        return isset($result['count']) ? (int)$result['count'] : 0;
+    }
+
+    /**
+     * اجرای کوئری و دریافت اولین نتیجه
+     *
+     * @return array|null
+     */
+    public function first(): ?array
+    {
+        $sql = $this->limit(1)->toSql();
+        return $this->connection->fetchOne($sql, $this->params);
+    }
+
+    /**
+     * ساخت کوئری SQL کامل
+     *
+     * @return string
+     */
+    public function toSql(): string
+    {
+        $parts = [
+            $this->buildSelect(),
+            $this->buildFrom(),
+            $this->buildJoins(),
+            $this->buildWheres(),
+            $this->buildGroups(),
+            $this->buildHaving(),
+            $this->buildOrders(),
+            $this->buildLimitOffset()
+        ];
+
+        return implode(' ', array_filter($parts));
     }
 
     /**
@@ -479,45 +611,6 @@ class QueryBuilder
         }
 
         return implode(' ', $sql);
-    }
-
-    /**
-     * ساخت بخش WHERE کوئری
-     *
-     * @return string
-     */
-    protected function buildWheres(): string
-    {
-        if (empty($this->wheres)) {
-            return '';
-        }
-
-        $sql = [];
-
-        foreach ($this->wheres as $i => $where) {
-            $boolean = $i === 0 ? '' : $where['boolean'] . ' ';
-
-            switch ($where['type']) {
-                case 'basic':
-                    $sql[] = $boolean . $where['column'] . ' ' . $where['operator'] . ' ' . $where['param'];
-                    break;
-
-                case 'null':
-                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' IS NOT NULL' : ' IS NULL');
-                    break;
-
-                case 'in':
-                    $placeholders = implode(', ', $where['params']);
-                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' NOT IN ' : ' IN ') . '(' . $placeholders . ')';
-                    break;
-
-                case 'between':
-                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' NOT BETWEEN ' : ' BETWEEN ') . $where['min_param'] . ' AND ' . $where['max_param'];
-                    break;
-            }
-        }
-
-        return 'WHERE ' . implode(' ', $sql);
     }
 
     /**
@@ -589,132 +682,6 @@ class QueryBuilder
     }
 
     /**
-     * ساخت کوئری SQL کامل
-     *
-     * @return string
-     */
-    public function toSql(): string
-    {
-        $parts = [
-            $this->buildSelect(),
-            $this->buildFrom(),
-            $this->buildJoins(),
-            $this->buildWheres(),
-            $this->buildGroups(),
-            $this->buildHaving(),
-            $this->buildOrders(),
-            $this->buildLimitOffset()
-        ];
-
-        return implode(' ', array_filter($parts));
-    }
-
-    /**
-     * دریافت پارامترهای کوئری
-     *
-     * @return array
-     */
-    public function getParams(): array
-    {
-        return $this->params;
-    }
-
-    /**
-     * اجرای کوئری و دریافت همه نتایج
-     *
-     * @return array
-     */
-    public function get(): array
-    {
-        $sql = $this->toSql();
-        return $this->connection->fetchAll($sql, $this->params);
-    }
-
-    /**
-     * اجرای کوئری و دریافت اولین نتیجه
-     *
-     * @return array|null
-     */
-    public function first(): ?array
-    {
-        $sql = $this->limit(1)->toSql();
-        return $this->connection->fetchOne($sql, $this->params);
-    }
-
-    /**
-     * اجرای کوئری و دریافت تعداد نتایج
-     *
-     * @param string $column نام ستون (پیش‌فرض: *)
-     * @return int
-     */
-    public function count(string $column = '*'): int
-    {
-        $original = $this->selects;
-        $this->selects = ["COUNT({$column}) as count"];
-
-        $result = $this->first();
-        $this->selects = $original;
-
-        return isset($result['count']) ? (int) $result['count'] : 0;
-    }
-
-    /**
-     * درج داده در جدول
-     *
-     * @param array $data داده‌های برای درج
-     * @return int آیدی آخرین رکورد درج شده
-     */
-    public function insert(array $data): int
-    {
-        return $this->connection->insert($this->table, $data);
-    }
-
-    /**
-     * به‌روزرسانی داده‌ها
-     *
-     * @param array $data داده‌های برای به‌روزرسانی
-     * @return int تعداد رکوردهای تغییر یافته
-     */
-    public function update(array $data): int
-    {
-        $where = $this->buildWheres();
-        $where = str_replace('WHERE ', '', $where);
-
-        if (empty($where)) {
-            throw new \InvalidArgumentException('Update requires a WHERE clause. Call where() method first.');
-        }
-
-        return $this->connection->update($this->table, $data, $where, $this->params);
-    }
-
-    /**
-     * حذف داده‌ها
-     *
-     * @return int تعداد رکوردهای حذف شده
-     */
-    public function delete(): int
-    {
-        $where = $this->buildWheres();
-        $where = str_replace('WHERE ', '', $where);
-
-        if (empty($where)) {
-            throw new \InvalidArgumentException('Delete requires a WHERE clause. Call where() method first.');
-        }
-
-        return $this->connection->delete($this->table, $where, $this->params);
-    }
-
-    /**
-     * بررسی وجود حداقل یک رکورد
-     *
-     * @return bool
-     */
-    public function exists(): bool
-    {
-        return $this->count() > 0;
-    }
-
-    /**
      * دریافت مقدار یک ستون خاص
      *
      * @param string $column نام ستون
@@ -732,6 +699,18 @@ class QueryBuilder
     }
 
     /**
+     * انتخاب ستون‌ها
+     *
+     * @param string|array $columns ستون‌های مورد نظر
+     * @return self
+     */
+    public function select($columns = ['*']): self
+    {
+        $this->selects = is_array($columns) ? $columns : func_get_args();
+        return $this;
+    }
+
+    /**
      * دریافت یک ستون به صورت آرایه
      *
      * @param string $column نام ستون
@@ -744,6 +723,17 @@ class QueryBuilder
         return array_map(function ($row) use ($column) {
             return $row[$column] ?? null;
         }, $results);
+    }
+
+    /**
+     * اجرای کوئری و دریافت همه نتایج
+     *
+     * @return array
+     */
+    public function get(): array
+    {
+        $sql = $this->toSql();
+        return $this->connection->fetchAll($sql, $this->params);
     }
 
     /**
@@ -764,6 +754,16 @@ class QueryBuilder
         }
 
         return $sql;
+    }
+
+    /**
+     * دریافت پارامترهای کوئری
+     *
+     * @return array
+     */
+    public function getParams(): array
+    {
+        return $this->params;
     }
 
     /**

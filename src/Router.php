@@ -85,7 +85,7 @@ class Router
             // بررسی تطابق مسیر
             if (preg_match($route['pattern'], $path, $matches)) {
                 // حذف کلیدهای عددی از نتیجه تطبیق
-                $params = array_filter($matches, function($key) {
+                $params = array_filter($matches, function ($key) {
                     return !is_numeric($key);
                 }, ARRAY_FILTER_USE_KEY);
 

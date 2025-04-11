@@ -3,8 +3,8 @@
 namespace PHLask\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Request - کلاس درخواست HTTP
@@ -83,12 +83,13 @@ class Request implements ServerRequestInterface
      * @param string $version نسخه پروتکل
      */
     public function __construct(
-        string $method,
-        UriInterface $uri,
-        array $headers = [],
+        string           $method,
+        UriInterface     $uri,
+        array            $headers = [],
         ?StreamInterface $body = null,
-        string $version = '1.1'
-    ) {
+        string           $version = '1.1'
+    )
+    {
         $this->method = $method;
         $this->uri = $uri;
         $this->headers = $headers;
@@ -127,6 +128,49 @@ class Request implements ServerRequestInterface
             ->withCookieParams($_COOKIE)
             ->withServerParams($_SERVER)
             ->withParsedBody($_POST);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withParsedBody($data): self
+    {
+        $clone = clone $this;
+        $clone->parsedBody = $data;
+        return $clone;
+    }
+
+    /**
+     * تنظیم پارامترهای سرور
+     *
+     * @param array $serverParams
+     * @return self
+     */
+    public function withServerParams(array $serverParams): self
+    {
+        $clone = clone $this;
+        $clone->serverParams = $serverParams;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withCookieParams(array $cookies): self
+    {
+        $clone = clone $this;
+        $clone->cookieParams = $cookies;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withQueryParams(array $query): self
+    {
+        $clone = clone $this;
+        $clone->queryParams = $query;
+        return $clone;
     }
 
     /**
@@ -182,6 +226,8 @@ class Request implements ServerRequestInterface
         return $default;
     }
 
+    // --------------------- پیاده‌سازی متدهای PSR-7 ---------------------
+
     /**
      * دریافت تمام داده‌های بدنه درخواست
      *
@@ -215,6 +261,32 @@ class Request implements ServerRequestInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getHeaderLine($name): string
+    {
+        $header = $this->getHeader($name);
+        if (empty($header)) {
+            return '';
+        }
+        return implode(', ', $header);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHeader($name): array
+    {
+        $name = strtolower($name);
+        foreach ($this->headers as $key => $value) {
+            if (strtolower($key) === $name) {
+                return is_array($value) ? $value : [$value];
+            }
+        }
+        return [];
+    }
+
+    /**
      * بررسی اینکه درخواست از نوع JSON است
      *
      * @return bool
@@ -224,8 +296,6 @@ class Request implements ServerRequestInterface
         $contentType = $this->getHeaderLine('Content-Type');
         return strpos($contentType, 'application/json') !== false;
     }
-
-    // --------------------- پیاده‌سازی متدهای PSR-7 ---------------------
 
     /**
      * @inheritDoc
@@ -256,56 +326,6 @@ class Request implements ServerRequestInterface
     /**
      * @inheritDoc
      */
-    public function hasHeader($name): bool
-    {
-        $name = strtolower($name);
-        foreach ($this->headers as $key => $value) {
-            if (strtolower($key) === $name) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getHeader($name): array
-    {
-        $name = strtolower($name);
-        foreach ($this->headers as $key => $value) {
-            if (strtolower($key) === $name) {
-                return is_array($value) ? $value : [$value];
-            }
-        }
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getHeaderLine($name): string
-    {
-        $header = $this->getHeader($name);
-        if (empty($header)) {
-            return '';
-        }
-        return implode(', ', $header);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withHeader($name, $value): self
-    {
-        $clone = clone $this;
-        $clone->headers[$name] = is_array($value) ? $value : [$value];
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function withAddedHeader($name, $value): self
     {
         if (!$this->hasHeader($name)) {
@@ -324,6 +344,30 @@ class Request implements ServerRequestInterface
         }
 
         $clone->headers[$name] = $values;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasHeader($name): bool
+    {
+        $name = strtolower($name);
+        foreach ($this->headers as $key => $value) {
+            if (strtolower($key) === $name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withHeader($name, $value): self
+    {
+        $clone = clone $this;
+        $clone->headers[$name] = is_array($value) ? $value : [$value];
         return $clone;
     }
 
@@ -462,29 +506,9 @@ class Request implements ServerRequestInterface
     /**
      * @inheritDoc
      */
-    public function withCookieParams(array $cookies): self
-    {
-        $clone = clone $this;
-        $clone->cookieParams = $cookies;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getQueryParams(): array
     {
         return $this->queryParams;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withQueryParams(array $query): self
-    {
-        $clone = clone $this;
-        $clone->queryParams = $query;
-        return $clone;
     }
 
     /**
@@ -511,16 +535,6 @@ class Request implements ServerRequestInterface
     public function getParsedBody()
     {
         return $this->parsedBody;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withParsedBody($data): self
-    {
-        $clone = clone $this;
-        $clone->parsedBody = $data;
-        return $clone;
     }
 
     /**
@@ -564,19 +578,6 @@ class Request implements ServerRequestInterface
 
         $clone = clone $this;
         unset($clone->attributes[$name]);
-        return $clone;
-    }
-
-    /**
-     * تنظیم پارامترهای سرور
-     *
-     * @param array $serverParams
-     * @return self
-     */
-    public function withServerParams(array $serverParams): self
-    {
-        $clone = clone $this;
-        $clone->serverParams = $serverParams;
         return $clone;
     }
 }

@@ -25,12 +25,13 @@
 
 ## کلاس HttpException
 
-فلسک‌پی‌اچ‌پی کلاس `HttpException` را برای مدیریت خطاهای HTTP ارائه می‌دهد. این کلاس یک نمونه از `Exception` است که اطلاعات اضافی مانند کد وضعیت HTTP و جزئیات خطا را به همراه دارد.
+فلسک‌پی‌اچ‌پی کلاس `HttpException` را برای مدیریت خطاهای HTTP ارائه می‌دهد. این کلاس یک نمونه از `Exception` است که
+اطلاعات اضافی مانند کد وضعیت HTTP و جزئیات خطا را به همراه دارد.
 
 ### ایجاد یک استثنای HTTP
 
 ```php
-use FlaskPHP\Exceptions\HttpException;
+use PLHask\Exceptions\HttpException;
 
 // ایجاد استثنا به صورت مستقیم
 throw new HttpException(404, 'صفحه مورد نظر یافت نشد');
@@ -78,7 +79,7 @@ throw HttpException::internalServerError('خطای داخلی سرور');
 برای خطاهای مربوط به پایگاه داده، فلسک‌پی‌اچ‌پی کلاس `DatabaseException` را ارائه می‌دهد:
 
 ```php
-use FlaskPHP\Exceptions\DatabaseException;
+use PLHask\Exceptions\DatabaseException;
 
 // ایجاد استثنای خطای اتصال
 throw DatabaseException::connectionError(
@@ -102,9 +103,9 @@ throw DatabaseException::queryError(
 در فلسک‌پی‌اچ‌پی می‌توانید برای هر کد وضعیت HTTP، یک مدیریت‌کننده خطا تعریف کنید:
 
 ```php
-use FlaskPHP\App;
-use FlaskPHP\Http\Request;
-use FlaskPHP\Http\Response;
+use PLHask\App;
+use PLHask\Http\Request;
+use PLHask\Http\Response;
 
 $app = App::getInstance();
 
@@ -170,7 +171,8 @@ $app->errorHandler(422, function($error, Request $request, Response $response) {
 
 ## پرتاب و مدیریت استثناها در مسیرها
 
-حال می‌توانید در مسیرهای خود، استثناها را پرتاب کنید و فلسک‌پی‌اچ‌پی آنها را به مدیریت‌کننده‌های خطای مناسب هدایت می‌کند:
+حال می‌توانید در مسیرهای خود، استثناها را پرتاب کنید و فلسک‌پی‌اچ‌پی آنها را به مدیریت‌کننده‌های خطای مناسب هدایت
+می‌کند:
 
 ```php
 $app->get('/users/{id}', function(Request $request, Response $response) {
@@ -293,7 +295,8 @@ $app->post('/users', function(Request $request, Response $response) {
 
 ## لاگ کردن خطاها
 
-ثبت خطاها (logging) یک بخش مهم از مدیریت خطا است. فلسک‌پی‌اچ‌پی با PSR-3 سازگار است و می‌توانید از هر پیاده‌سازی از `Psr\Log\LoggerInterface` استفاده کنید:
+ثبت خطاها (logging) یک بخش مهم از مدیریت خطا است. فلسک‌پی‌اچ‌پی با PSR-3 سازگار است و می‌توانید از هر پیاده‌سازی از
+`Psr\Log\LoggerInterface` استفاده کنید:
 
 ```php
 use Psr\Log\LoggerInterface;
@@ -823,7 +826,8 @@ public function testValidationError()
 4. **امنیت**: از افشای اطلاعات حساس جلوگیری کنید
 5. **تجربه کاربری**: تجربه کاربری بهتری با مدیریت صحیح خطاها ارائه دهید
 
-با استفاده از ابزارهای ارائه شده توسط فلسک‌پی‌اچ‌پی مانند `HttpException`، `DatabaseException` و مدیریت‌کننده‌های خطا، می‌توانید سیستم مدیریت خطای قوی و انعطاف‌پذیری برای برنامه خود ایجاد کنید.
+با استفاده از ابزارهای ارائه شده توسط فلسک‌پی‌اچ‌پی مانند `HttpException`، `DatabaseException` و مدیریت‌کننده‌های خطا،
+می‌توانید سیستم مدیریت خطای قوی و انعطاف‌پذیری برای برنامه خود ایجاد کنید.
 
 ## گام بعدی
 
@@ -833,7 +837,8 @@ public function testValidationError()
 - [اعتبارسنجی داده‌ها](../guides/validation.md) - نحوه اعتبارسنجی داده‌های ورودی
 - [امنیت](../advanced/security.md) - بهترین روش‌های امنیتی در فلسک‌پی‌اچ‌پی# مدیریت خطا (Error Handling)
 
-مدیریت صحیح خطاها یک بخش مهم از هر اپلیکیشن وب است. فلسک‌پی‌اچ‌پی ابزارهای مختلفی را برای مدیریت و گزارش خطاها ارائه می‌دهد تا شما بتوانید برنامه‌ای ایمن و با قابلیت اطمینان بالا ایجاد کنید.
+مدیریت صحیح خطاها یک بخش مهم از هر اپلیکیشن وب است. فلسک‌پی‌اچ‌پی ابزارهای مختلفی را برای مدیریت و گزارش خطاها ارائه
+می‌دهد تا شما بتوانید برنامه‌ای ایمن و با قابلیت اطمینان بالا ایجاد کنید.
 
 ## مقدمه
 

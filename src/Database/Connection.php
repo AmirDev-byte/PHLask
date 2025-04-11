@@ -2,9 +2,9 @@
 
 namespace PHLask\Database;
 
-use PHLask\Exceptions\DatabaseException;
 use PDO;
 use PDOException;
+use PHLask\Exceptions\DatabaseException;
 
 /**
  * Connection - کلاس اتصال به پایگاه داده
@@ -14,19 +14,17 @@ use PDOException;
 class Connection
 {
     /**
+     * @var array اتصال‌های ایجاد شده
+     */
+    private static array $connections = [];
+    /**
      * @var PDO نمونه PDO برای اتصال به پایگاه داده
      */
     private PDO $pdo;
-
     /**
      * @var array تنظیمات اتصال
      */
     private array $config;
-
-    /**
-     * @var array اتصال‌های ایجاد شده
-     */
-    private static array $connections = [];
 
     /**
      * سازنده کلاس Connection
@@ -58,8 +56,8 @@ class Connection
     /**
      * ایجاد اتصال به پایگاه داده
      *
-     * @throws DatabaseException در صورت خطا در اتصال
      * @return void
+     * @throws DatabaseException در صورت خطا در اتصال
      */
     private function connect(): void
     {
@@ -117,6 +115,27 @@ class Connection
     }
 
     /**
+     * ایجاد یا دریافت اتصال
+     *
+     * @param string $name نام اتصال
+     * @param array|null $config پیکربندی اتصال (فقط برای ایجاد اتصال جدید)
+     * @return Connection
+     * @throws DatabaseException در صورت خطا در اتصال
+     */
+    public static function connection(string $name = 'default', ?array $config = null): Connection
+    {
+        if (!isset(self::$connections[$name])) {
+            if ($config === null) {
+                throw new \InvalidArgumentException("Configuration required for new connection: {$name}");
+            }
+
+            self::$connections[$name] = new self($config);
+        }
+
+        return self::$connections[$name];
+    }
+
+    /**
      * دریافت نمونه PDO
      *
      * @return PDO
@@ -134,6 +153,21 @@ class Connection
     public function getConfig(): array
     {
         return $this->config;
+    }
+
+    /**
+     * دریافت نتیجه تک سطری
+     *
+     * @param string $query کوئری SQL
+     * @param array $params پارامترهای کوئری
+     * @return array|null سطر نتیجه یا null در صورت عدم وجود
+     * @throws DatabaseException در صورت خطا در اجرای کوئری
+     */
+    public function fetchOne(string $query, array $params = []): ?array
+    {
+        $statement = $this->query($query, $params);
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        return $result !== false ? $result : null;
     }
 
     /**
@@ -159,21 +193,6 @@ class Connection
                 $e
             );
         }
-    }
-
-    /**
-     * دریافت نتیجه تک سطری
-     *
-     * @param string $query کوئری SQL
-     * @param array $params پارامترهای کوئری
-     * @return array|null سطر نتیجه یا null در صورت عدم وجود
-     * @throws DatabaseException در صورت خطا در اجرای کوئری
-     */
-    public function fetchOne(string $query, array $params = []): ?array
-    {
-        $statement = $this->query($query, $params);
-        $result = $statement->fetch(PDO::FETCH_ASSOC);
-        return $result !== false ? $result : null;
     }
 
     /**
@@ -245,7 +264,7 @@ class Connection
         }
 
         $this->query($query, $params);
-        return (int) $this->pdo->lastInsertId();
+        return (int)$this->pdo->lastInsertId();
     }
 
     /**
@@ -325,26 +344,5 @@ class Connection
 
             throw $e;
         }
-    }
-
-    /**
-     * ایجاد یا دریافت اتصال
-     *
-     * @param string $name نام اتصال
-     * @param array|null $config پیکربندی اتصال (فقط برای ایجاد اتصال جدید)
-     * @return Connection
-     * @throws DatabaseException در صورت خطا در اتصال
-     */
-    public static function connection(string $name = 'default', ?array $config = null): Connection
-    {
-        if (!isset(self::$connections[$name])) {
-            if ($config === null) {
-                throw new \InvalidArgumentException("Configuration required for new connection: {$name}");
-            }
-
-            self::$connections[$name] = new self($config);
-        }
-
-        return self::$connections[$name];
     }
 }

@@ -6,11 +6,11 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use PHLask\App;
+use PHLask\Database\Connection;
+use PHLask\Exceptions\HttpException;
 use PHLask\Http\Request;
 use PHLask\Http\Response;
-use PHLask\Database\Connection;
 use PHLask\Middleware\CorsMiddleware;
-use PHLask\Exceptions\HttpException;
 
 // تنظیمات پایگاه داده
 $dbConfig = [
@@ -47,7 +47,7 @@ $app->middleware(new CorsMiddleware([
 ]));
 
 // افزودن میان‌افزار احراز هویت
-$app->middleware(function(Request $request, Response $response) {
+$app->middleware(function (Request $request, Response $response) {
     // مسیرهایی که نیاز به احراز هویت ندارند
     $publicRoutes = [
         '/',
@@ -92,7 +92,7 @@ $app->middleware(function(Request $request, Response $response) {
 // تعریف مسیرها
 
 // صفحه اصلی
-$app->get('/', function(Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response) {
     return $response->json([
         'message' => 'Welcome to PHLask API',
         'version' => '1.0.0',
@@ -100,7 +100,7 @@ $app->get('/', function(Request $request, Response $response) {
 });
 
 // مسیر ورود کاربر
-$app->post('/login', function(Request $request, Response $response) {
+$app->post('/login', function (Request $request, Response $response) {
     $username = $request->input('username');
     $password = $request->input('password');
 
@@ -126,14 +126,14 @@ $app->post('/login', function(Request $request, Response $response) {
 });
 
 // دریافت اطلاعات کاربر جاری
-$app->get('/user', function(Request $request, Response $response) {
+$app->get('/user', function (Request $request, Response $response) {
     $user = $request->getAttribute('user');
 
     return $response->json($user);
 });
 
 // دریافت لیست کاربران
-$app->get('/users', function(Request $request, Response $response) {
+$app->get('/users', function (Request $request, Response $response) {
     // در اینجا می‌توانید لیست کاربران را از دیتابیس دریافت کنید
 
     // مثال استفاده از QueryBuilder
@@ -154,8 +154,8 @@ $app->get('/users', function(Request $request, Response $response) {
     $query->orderBy($sort, $order);
 
     // اعمال صفحه‌بندی
-    $page = (int) $request->query('page', 1);
-    $perPage = (int) $request->query('per_page', 10);
+    $page = (int)$request->query('page', 1);
+    $perPage = (int)$request->query('per_page', 10);
     $query->paginate($page, $perPage);
 
     try {
@@ -180,7 +180,7 @@ $app->get('/users', function(Request $request, Response $response) {
 });
 
 // دریافت اطلاعات یک کاربر
-$app->get('/users/{id}', function(Request $request, Response $response) {
+$app->get('/users/{id}', function (Request $request, Response $response) {
     $id = $request->param('id');
 
     try {
@@ -202,7 +202,7 @@ $app->get('/users/{id}', function(Request $request, Response $response) {
 });
 
 // ایجاد کاربر جدید
-$app->post('/users', function(Request $request, Response $response) {
+$app->post('/users', function (Request $request, Response $response) {
     $data = $request->all();
 
     // اعتبارسنجی داده‌ها
@@ -231,12 +231,12 @@ $app->post('/users', function(Request $request, Response $response) {
 });
 
 // به‌روزرسانی کاربر
-$app->put('/users/{id}', function(Request $request, Response $response) {
+$app->put('/users/{id}', function (Request $request, Response $response) {
     $id = $request->param('id');
     $data = $request->all();
 
     // حذف فیلدهای خالی
-    $data = array_filter($data, function($value) {
+    $data = array_filter($data, function ($value) {
         return $value !== null && $value !== '';
     });
 
@@ -273,7 +273,7 @@ $app->put('/users/{id}', function(Request $request, Response $response) {
 });
 
 // حذف کاربر
-$app->delete('/users/{id}', function(Request $request, Response $response) {
+$app->delete('/users/{id}', function (Request $request, Response $response) {
     $id = $request->param('id');
 
     try {
@@ -304,35 +304,35 @@ $app->delete('/users/{id}', function(Request $request, Response $response) {
 });
 
 // مدیریت خطاهای HTTP
-$app->errorHandler(404, function($error, Request $request, Response $response) {
+$app->errorHandler(404, function ($error, Request $request, Response $response) {
     return $response->status(404)->json([
         'error' => 'Not Found',
         'message' => $error ? $error->getMessage() : 'The requested resource was not found',
     ]);
 });
 
-$app->errorHandler(401, function($error, Request $request, Response $response) {
+$app->errorHandler(401, function ($error, Request $request, Response $response) {
     return $response->status(401)->json([
         'error' => 'Unauthorized',
         'message' => $error ? $error->getMessage() : 'Authentication is required',
     ]);
 });
 
-$app->errorHandler(400, function($error, Request $request, Response $response) {
+$app->errorHandler(400, function ($error, Request $request, Response $response) {
     return $response->status(400)->json([
         'error' => 'Bad Request',
         'message' => $error ? $error->getMessage() : 'Invalid request data',
     ]);
 });
 
-$app->errorHandler(403, function($error, Request $request, Response $response) {
+$app->errorHandler(403, function ($error, Request $request, Response $response) {
     return $response->status(403)->json([
         'error' => 'Forbidden',
         'message' => $error ? $error->getMessage() : 'You do not have permission to access this resource',
     ]);
 });
 
-$app->errorHandler(500, function($error, Request $request, Response $response) {
+$app->errorHandler(500, function ($error, Request $request, Response $response) {
     return $response->status(500)->json([
         'error' => 'Internal Server Error',
         'message' => $error ? $error->getMessage() : 'An unexpected error occurred',

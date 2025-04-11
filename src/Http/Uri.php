@@ -12,46 +12,6 @@ use Psr\Http\Message\UriInterface;
 class Uri implements UriInterface
 {
     /**
-     * @var string طرح (scheme) آدرس
-     */
-    private string $scheme = '';
-
-    /**
-     * @var string نام کاربری
-     */
-    private string $user = '';
-
-    /**
-     * @var string|null رمز عبور
-     */
-    private ?string $password = null;
-
-    /**
-     * @var string میزبان
-     */
-    private string $host = '';
-
-    /**
-     * @var int|null پورت
-     */
-    private ?int $port = null;
-
-    /**
-     * @var string مسیر
-     */
-    private string $path = '';
-
-    /**
-     * @var string پارامترهای کوئری
-     */
-    private string $query = '';
-
-    /**
-     * @var string قطعه (fragment)
-     */
-    private string $fragment = '';
-
-    /**
      * @var array پورت‌های پیش‌فرض برای طرح‌های مختلف
      */
     private const DEFAULT_PORTS = [
@@ -60,6 +20,38 @@ class Uri implements UriInterface
         'ftp' => 21,
         'sftp' => 22,
     ];
+    /**
+     * @var string طرح (scheme) آدرس
+     */
+    private string $scheme = '';
+    /**
+     * @var string نام کاربری
+     */
+    private string $user = '';
+    /**
+     * @var string|null رمز عبور
+     */
+    private ?string $password = null;
+    /**
+     * @var string میزبان
+     */
+    private string $host = '';
+    /**
+     * @var int|null پورت
+     */
+    private ?int $port = null;
+    /**
+     * @var string مسیر
+     */
+    private string $path = '';
+    /**
+     * @var string پارامترهای کوئری
+     */
+    private string $query = '';
+    /**
+     * @var string قطعه (fragment)
+     */
+    private string $fragment = '';
 
     /**
      * سازنده کلاس Uri
@@ -79,7 +71,7 @@ class Uri implements UriInterface
             $this->user = $parts['user'] ?? '';
             $this->password = isset($parts['pass']) ? $parts['pass'] : null;
             $this->host = isset($parts['host']) ? strtolower($parts['host']) : '';
-            $this->port = isset($parts['port']) ? (int) $parts['port'] : null;
+            $this->port = isset($parts['port']) ? (int)$parts['port'] : null;
             $this->path = $parts['path'] ?? '';
             $this->query = $parts['query'] ?? '';
             $this->fragment = $parts['fragment'] ?? '';
@@ -104,7 +96,7 @@ class Uri implements UriInterface
         $uri = $uri->withHost($host);
 
         if (isset($_SERVER['SERVER_PORT'])) {
-            $uri = $uri->withPort((int) $_SERVER['SERVER_PORT']);
+            $uri = $uri->withPort((int)$_SERVER['SERVER_PORT']);
         }
 
         // تنظیم مسیر و کوئری
@@ -123,35 +115,111 @@ class Uri implements UriInterface
     /**
      * @inheritDoc
      */
-    public function getScheme(): string
+    public function withScheme($scheme): self
     {
-        return $this->scheme;
+        $scheme = strtolower($scheme);
+
+        if ($this->scheme === $scheme) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->scheme = $scheme;
+        return $clone;
     }
 
     /**
      * @inheritDoc
      */
-    public function getAuthority(): string
+    public function withHost($host): self
     {
-        if (empty($this->host)) {
-            return '';
+        $host = strtolower($host);
+
+        if ($this->host === $host) {
+            return $this;
         }
 
-        $authority = $this->host;
+        $clone = clone $this;
+        $clone->host = $host;
+        return $clone;
+    }
 
-        if (!empty($this->user)) {
-            $userInfo = $this->user;
-            if ($this->password !== null) {
-                $userInfo .= ':' . $this->password;
+    /**
+     * @inheritDoc
+     */
+    public function withPort($port): self
+    {
+        if ($port !== null) {
+            $port = (int)$port;
+            if ($port < 1 || $port > 65535) {
+                throw new \InvalidArgumentException('Invalid port: ' . $port . '. Must be between 1 and 65535');
             }
-            $authority = $userInfo . '@' . $authority;
         }
 
-        if ($this->port !== null && !$this->isDefaultPort()) {
-            $authority .= ':' . $this->port;
+        if ($this->port === $port) {
+            return $this;
         }
 
-        return $authority;
+        $clone = clone $this;
+        $clone->port = $port;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withQuery($query): self
+    {
+        if (is_string($query) && strpos($query, '?') === 0) {
+            $query = substr($query, 1);
+        }
+
+        if (strpos($query, '#') !== false) {
+            throw new \InvalidArgumentException('Query cannot contain a fragment');
+        }
+
+        if ($this->query === $query) {
+            return $this;
+        }
+
+        $clone = clone $this;
+        $clone->query = $query;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withPath($path): self
+    {
+        if (strpos($path, '?') !== false) {
+            throw new \InvalidArgumentException('Path cannot contain a query string');
+        }
+
+        if (strpos($path, '#') !== false) {
+            throw new \InvalidArgumentException('Path cannot contain a fragment');
+        }
+
+        if ($this->path === $path) {
+            return $this;
+        }
+
+        // اطمینان از وجود / در ابتدای مسیر
+        if (!empty($path) && $path[0] !== '/') {
+            $path = '/' . $path;
+        }
+
+        $clone = clone $this;
+        $clone->path = $path;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getScheme(): string
+    {
+        return $this->scheme;
     }
 
     /**
@@ -232,22 +300,6 @@ class Uri implements UriInterface
     /**
      * @inheritDoc
      */
-    public function withScheme($scheme): self
-    {
-        $scheme = strtolower($scheme);
-
-        if ($this->scheme === $scheme) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->scheme = $scheme;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function withUserInfo($user, $password = null): self
     {
         if ($this->user === $user && $this->password === $password) {
@@ -257,92 +309,6 @@ class Uri implements UriInterface
         $clone = clone $this;
         $clone->user = $user;
         $clone->password = $password;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withHost($host): self
-    {
-        $host = strtolower($host);
-
-        if ($this->host === $host) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->host = $host;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withPort($port): self
-    {
-        if ($port !== null) {
-            $port = (int) $port;
-            if ($port < 1 || $port > 65535) {
-                throw new \InvalidArgumentException('Invalid port: ' . $port . '. Must be between 1 and 65535');
-            }
-        }
-
-        if ($this->port === $port) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->port = $port;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withPath($path): self
-    {
-        if (strpos($path, '?') !== false) {
-            throw new \InvalidArgumentException('Path cannot contain a query string');
-        }
-
-        if (strpos($path, '#') !== false) {
-            throw new \InvalidArgumentException('Path cannot contain a fragment');
-        }
-
-        if ($this->path === $path) {
-            return $this;
-        }
-
-        // اطمینان از وجود / در ابتدای مسیر
-        if (!empty($path) && $path[0] !== '/') {
-            $path = '/' . $path;
-        }
-
-        $clone = clone $this;
-        $clone->path = $path;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withQuery($query): self
-    {
-        if (is_string($query) && strpos($query, '?') === 0) {
-            $query = substr($query, 1);
-        }
-
-        if (strpos($query, '#') !== false) {
-            throw new \InvalidArgumentException('Query cannot contain a fragment');
-        }
-
-        if ($this->query === $query) {
-            return $this;
-        }
-
-        $clone = clone $this;
-        $clone->query = $query;
         return $clone;
     }
 
@@ -391,5 +357,31 @@ class Uri implements UriInterface
         }
 
         return $uri;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAuthority(): string
+    {
+        if (empty($this->host)) {
+            return '';
+        }
+
+        $authority = $this->host;
+
+        if (!empty($this->user)) {
+            $userInfo = $this->user;
+            if ($this->password !== null) {
+                $userInfo .= ':' . $this->password;
+            }
+            $authority = $userInfo . '@' . $authority;
+        }
+
+        if ($this->port !== null && !$this->isDefaultPort()) {
+            $authority .= ':' . $this->port;
+        }
+
+        return $authority;
     }
 }

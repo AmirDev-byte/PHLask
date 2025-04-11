@@ -33,26 +33,22 @@ abstract class Model
      * @var string نام ستون زمان به‌روزرسانی
      */
     protected static string $updatedAt = 'updated_at';
-
-    /**
-     * @var array مقادیر ویژگی‌های مدل
-     */
-    protected array $attributes = [];
-
-    /**
-     * @var array مقادیر اصلی (قبل از تغییر)
-     */
-    protected array $original = [];
-
-    /**
-     * @var bool آیا مدل جدید است
-     */
-    protected bool $exists = false;
-
     /**
      * @var Connection|null اتصال پایگاه داده
      */
     protected static ?Connection $connection = null;
+    /**
+     * @var array مقادیر ویژگی‌های مدل
+     */
+    protected array $attributes = [];
+    /**
+     * @var array مقادیر اصلی (قبل از تغییر)
+     */
+    protected array $original = [];
+    /**
+     * @var bool آیا مدل جدید است
+     */
+    protected bool $exists = false;
 
     /**
      * سازنده کلاس Model
@@ -99,207 +95,15 @@ abstract class Model
     }
 
     /**
-     * دریافت یک ویژگی
-     *
-     * @param string $key نام ویژگی
-     * @return mixed
-     */
-    public function getAttribute(string $key)
-    {
-        return $this->attributes[$key] ?? null;
-    }
-
-    /**
-     * بررسی تغییر یک ویژگی
-     *
-     * @param string $key نام ویژگی
-     * @return bool
-     */
-    public function isDirty(string $key = null): bool
-    {
-        if ($key === null) {
-            return $this->attributes != $this->original;
-        }
-
-        if (!array_key_exists($key, $this->original)) {
-            return array_key_exists($key, $this->attributes);
-        }
-
-        return $this->attributes[$key] !== $this->original[$key];
-    }
-
-    /**
-     * دریافت مقادیر تغییر یافته
+     * دریافت همه رکوردها
      *
      * @return array
      */
-    public function getDirty(): array
+    public static function all(): array
     {
-        $dirty = [];
+        $records = static::query()->get();
 
-        foreach ($this->attributes as $key => $value) {
-            if (!array_key_exists($key, $this->original) || $value !== $this->original[$key]) {
-                $dirty[$key] = $value;
-            }
-        }
-
-        return $dirty;
-    }
-
-    /**
-     * ذخیره مدل در پایگاه داده
-     *
-     * @return bool
-     */
-    public function save(): bool
-    {
-        if ($this->exists) {
-            return $this->update();
-        }
-
-        return $this->insert();
-    }
-
-    /**
-     * درج مدل در پایگاه داده
-     *
-     * @return bool
-     */
-    protected function insert(): bool
-    {
-        $attributes = $this->attributes;
-
-        // افزودن زمان ایجاد و به‌روزرسانی
-        if (static::$timestamps) {
-            $time = date('Y-m-d H:i:s');
-            $attributes[static::$createdAt] = $time;
-            $attributes[static::$updatedAt] = $time;
-        }
-
-        // درج در پایگاه داده
-        $id = static::getConnection()->insert(static::getTable(), $attributes);
-
-        if ($id) {
-            $this->exists = true;
-            $this->setAttribute(static::$primaryKey, $id);
-            $this->original = $this->attributes;
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * به‌روزرسانی مدل در پایگاه داده
-     *
-     * @return bool
-     */
-    protected function update(): bool
-    {
-        $dirty = $this->getDirty();
-
-        if (empty($dirty)) {
-            return true;
-        }
-
-        // افزودن زمان به‌روزرسانی
-        if (static::$timestamps) {
-            $dirty[static::$updatedAt] = date('Y-m-d H:i:s');
-        }
-
-        // به‌روزرسانی در پایگاه داده
-        $updated = static::getConnection()->update(
-            static::getTable(),
-            $dirty,
-            static::$primaryKey . ' = :id',
-            [':id' => $this->getAttribute(static::$primaryKey)]
-        );
-
-        if ($updated) {
-            $this->fill($dirty);
-            $this->original = $this->attributes;
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * حذف مدل از پایگاه داده
-     *
-     * @return bool
-     */
-    public function delete(): bool
-    {
-        if (!$this->exists) {
-            return false;
-        }
-
-        $deleted = static::getConnection()->delete(
-            static::getTable(),
-            static::$primaryKey . ' = :id',
-            [':id' => $this->getAttribute(static::$primaryKey)]
-        );
-
-        if ($deleted) {
-            $this->exists = false;
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * تبدیل مدل به آرایه
-     *
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return $this->attributes;
-    }
-
-    /**
-     * دسترسی به ویژگی‌ها به صورت خصوصیت
-     *
-     * @param string $key نام ویژگی
-     * @return mixed
-     */
-    public function __get(string $key)
-    {
-        return $this->getAttribute($key);
-    }
-
-    /**
-     * تنظیم ویژگی‌ها به صورت خصوصیت
-     *
-     * @param string $key نام ویژگی
-     * @param mixed $value مقدار ویژگی
-     */
-    public function __set(string $key, $value)
-    {
-        $this->setAttribute($key, $value);
-    }
-
-    /**
-     * بررسی وجود ویژگی
-     *
-     * @param string $key نام ویژگی
-     * @return bool
-     */
-    public function __isset(string $key)
-    {
-        return isset($this->attributes[$key]);
-    }
-
-    /**
-     * حذف ویژگی
-     *
-     * @param string $key نام ویژگی
-     */
-    public function __unset(string $key)
-    {
-        unset($this->attributes[$key]);
+        return static::hydrate($records);
     }
 
     /**
@@ -313,15 +117,20 @@ abstract class Model
     }
 
     /**
-     * دریافت همه رکوردها
+     * تبدیل رکوردهای دیتابیس به مدل‌ها
      *
+     * @param array $records رکوردها
      * @return array
      */
-    public static function all(): array
+    protected static function hydrate(array $records): array
     {
-        $records = static::query()->get();
+        $models = [];
 
-        return static::hydrate($records);
+        foreach ($records as $record) {
+            $models[] = new static($record, true);
+        }
+
+        return $models;
     }
 
     /**
@@ -404,20 +213,168 @@ abstract class Model
     }
 
     /**
-     * تبدیل رکوردهای دیتابیس به مدل‌ها
+     * ذخیره مدل در پایگاه داده
      *
-     * @param array $records رکوردها
-     * @return array
+     * @return bool
      */
-    protected static function hydrate(array $records): array
+    public function save(): bool
     {
-        $models = [];
-
-        foreach ($records as $record) {
-            $models[] = new static($record, true);
+        if ($this->exists) {
+            return $this->update();
         }
 
-        return $models;
+        return $this->insert();
+    }
+
+    /**
+     * به‌روزرسانی مدل در پایگاه داده
+     *
+     * @return bool
+     */
+    protected function update(): bool
+    {
+        $dirty = $this->getDirty();
+
+        if (empty($dirty)) {
+            return true;
+        }
+
+        // افزودن زمان به‌روزرسانی
+        if (static::$timestamps) {
+            $dirty[static::$updatedAt] = date('Y-m-d H:i:s');
+        }
+
+        // به‌روزرسانی در پایگاه داده
+        $updated = static::getConnection()->update(
+            static::getTable(),
+            $dirty,
+            static::$primaryKey . ' = :id',
+            [':id' => $this->getAttribute(static::$primaryKey)]
+        );
+
+        if ($updated) {
+            $this->fill($dirty);
+            $this->original = $this->attributes;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * دریافت مقادیر تغییر یافته
+     *
+     * @return array
+     */
+    public function getDirty(): array
+    {
+        $dirty = [];
+
+        foreach ($this->attributes as $key => $value) {
+            if (!array_key_exists($key, $this->original) || $value !== $this->original[$key]) {
+                $dirty[$key] = $value;
+            }
+        }
+
+        return $dirty;
+    }
+
+    /**
+     * درج مدل در پایگاه داده
+     *
+     * @return bool
+     */
+    protected function insert(): bool
+    {
+        $attributes = $this->attributes;
+
+        // افزودن زمان ایجاد و به‌روزرسانی
+        if (static::$timestamps) {
+            $time = date('Y-m-d H:i:s');
+            $attributes[static::$createdAt] = $time;
+            $attributes[static::$updatedAt] = $time;
+        }
+
+        // درج در پایگاه داده
+        $id = static::getConnection()->insert(static::getTable(), $attributes);
+
+        if ($id) {
+            $this->exists = true;
+            $this->setAttribute(static::$primaryKey, $id);
+            $this->original = $this->attributes;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * بررسی تغییر یک ویژگی
+     *
+     * @param string $key نام ویژگی
+     * @return bool
+     */
+    public function isDirty(string $key = null): bool
+    {
+        if ($key === null) {
+            return $this->attributes != $this->original;
+        }
+
+        if (!array_key_exists($key, $this->original)) {
+            return array_key_exists($key, $this->attributes);
+        }
+
+        return $this->attributes[$key] !== $this->original[$key];
+    }
+
+    /**
+     * حذف مدل از پایگاه داده
+     *
+     * @return bool
+     */
+    public function delete(): bool
+    {
+        if (!$this->exists) {
+            return false;
+        }
+
+        $deleted = static::getConnection()->delete(
+            static::getTable(),
+            static::$primaryKey . ' = :id',
+            [':id' => $this->getAttribute(static::$primaryKey)]
+        );
+
+        if ($deleted) {
+            $this->exists = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * دریافت اتصال پایگاه داده
+     *
+     * @return Connection
+     */
+    public static function getConnection(): Connection
+    {
+        if (static::$connection === null) {
+            static::$connection = Connection::connection();
+        }
+
+        return static::$connection;
+    }
+
+    /**
+     * تنظیم اتصال پایگاه داده
+     *
+     * @param Connection $connection اتصال
+     * @return void
+     */
+    public static function setConnection(Connection $connection): void
+    {
+        static::$connection = $connection;
     }
 
     /**
@@ -442,27 +399,66 @@ abstract class Model
     }
 
     /**
-     * تنظیم اتصال پایگاه داده
+     * دریافت یک ویژگی
      *
-     * @param Connection $connection اتصال
-     * @return void
+     * @param string $key نام ویژگی
+     * @return mixed
      */
-    public static function setConnection(Connection $connection): void
+    public function getAttribute(string $key)
     {
-        static::$connection = $connection;
+        return $this->attributes[$key] ?? null;
     }
 
     /**
-     * دریافت اتصال پایگاه داده
+     * تبدیل مدل به آرایه
      *
-     * @return Connection
+     * @return array
      */
-    public static function getConnection(): Connection
+    public function toArray(): array
     {
-        if (static::$connection === null) {
-            static::$connection = Connection::connection();
-        }
+        return $this->attributes;
+    }
 
-        return static::$connection;
+    /**
+     * دسترسی به ویژگی‌ها به صورت خصوصیت
+     *
+     * @param string $key نام ویژگی
+     * @return mixed
+     */
+    public function __get(string $key)
+    {
+        return $this->getAttribute($key);
+    }
+
+    /**
+     * تنظیم ویژگی‌ها به صورت خصوصیت
+     *
+     * @param string $key نام ویژگی
+     * @param mixed $value مقدار ویژگی
+     */
+    public function __set(string $key, $value)
+    {
+        $this->setAttribute($key, $value);
+    }
+
+    /**
+     * بررسی وجود ویژگی
+     *
+     * @param string $key نام ویژگی
+     * @return bool
+     */
+    public function __isset(string $key)
+    {
+        return isset($this->attributes[$key]);
+    }
+
+    /**
+     * حذف ویژگی
+     *
+     * @param string $key نام ویژگی
+     */
+    public function __unset(string $key)
+    {
+        unset($this->attributes[$key]);
     }
 }

@@ -1,6 +1,7 @@
 # اتصال به پایگاه داده
 
-کلاس `Connection` در فلسک‌پی‌اچ‌پی مسئول ایجاد و مدیریت اتصال به پایگاه داده است. این کلاس پایه‌ای برای تمام عملیات دیتابیس مانند کوئری‌ها، تراکنش‌ها و ارتباط با مدل‌ها است.
+کلاس `Connection` در فلسک‌پی‌اچ‌پی مسئول ایجاد و مدیریت اتصال به پایگاه داده است. این کلاس پایه‌ای برای تمام عملیات
+دیتابیس مانند کوئری‌ها، تراکنش‌ها و ارتباط با مدل‌ها است.
 
 ## ایجاد اتصال به پایگاه داده
 
@@ -9,7 +10,7 @@
 ### روش 1: استفاده از متد استاتیک connection
 
 ```php
-use FlaskPHP\Database\Connection;
+use PLHask\Database\Connection;
 
 // ایجاد اتصال پیش‌فرض
 $connection = Connection::connection('default', [
@@ -35,7 +36,7 @@ $connection = Connection::connection('default');
 ### روش 2: ایجاد مستقیم نمونه جدید
 
 ```php
-use FlaskPHP\Database\Connection;
+use PLHask\Database\Connection;
 
 $connection = new Connection([
     'driver' => 'mysql',
@@ -51,7 +52,7 @@ $connection = new Connection([
 ### روش 3: استفاده از کلاس App
 
 ```php
-use FlaskPHP\App;
+use PLHask\App;
 
 $app = App::getInstance();
 
@@ -341,7 +342,7 @@ $logDb->insert('access_logs', ['user_id' => 1, 'action' => 'login']);
 هنگام کار با پایگاه داده، مدیریت خطاها بسیار مهم است:
 
 ```php
-use FlaskPHP\Exceptions\DatabaseException;
+use PLHask\Exceptions\DatabaseException;
 
 try {
     $users = $connection->fetchAll('SELECT * FROM non_existent_table');
@@ -418,7 +419,8 @@ $connection = new Connection([/* تنظیمات */]);
 $connection->close();
 ```
 
-توجه: در فلسک‌پی‌اچ‌پی، اتصال‌های ایجاد شده با متد `connection` به صورت خودکار مدیریت می‌شوند و نیازی به بستن دستی ندارند.
+توجه: در فلسک‌پی‌اچ‌پی، اتصال‌های ایجاد شده با متد `connection` به صورت خودکار مدیریت می‌شوند و نیازی به بستن دستی
+ندارند.
 
 ## عیب‌یابی مشکلات رایج
 

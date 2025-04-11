@@ -175,23 +175,6 @@ class Table
     }
 
     /**
-     * افزودن شرط where
-     *
-     * @param string $column نام ستون
-     * @param mixed $value مقدار
-     * @return $this
-     */
-    public function where(string $column, $value): self
-    {
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => '=',
-            'value' => $value
-        ];
-        return $this;
-    }
-
-    /**
      * مرتب‌سازی نتایج
      *
      * @param string $column نام ستون
@@ -204,18 +187,6 @@ class Table
             'column' => $column,
             'direction' => strtoupper($direction)
         ];
-        return $this;
-    }
-
-    /**
-     * محدود کردن نتایج
-     *
-     * @param int $limit تعداد
-     * @return $this
-     */
-    public function limit(int $limit): self
-    {
-        $this->limit = $limit;
         return $this;
     }
 
@@ -281,55 +252,38 @@ class Table
     }
 
     /**
-     * یافتن یک رکورد با ID
+     * ساخت بخش WHERE کوئری
      *
-     * @param int|string $id شناسه
-     * @return array|null
+     * @return array
      */
-    public function find($id): ?array
+    private function buildWhere(): array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM {$this->name} WHERE id = :id LIMIT 1");
-        $stmt->execute([':id' => $id]);
-        $result = $stmt->fetch();
-        return $result ?: null;
-    }
-
-    /**
-     * دریافت اولین رکورد براساس شرایط
-     *
-     * @return array|null
-     */
-    public function first(): ?array
-    {
-        $this->limit(1);
-        $results = $this->get();
-        return !empty($results) ? $results[0] : null;
-    }
-
-    /**
-     * درج رکورد جدید
-     *
-     * @param array $data داده‌ها
-     * @return int ID رکورد جدید
-     */
-    public function insert(array $data): int
-    {
-        $columns = array_keys($data);
-        $placeholders = array_map(function ($col) {
-            return ":{$col}";
-        }, $columns);
-
-        $sql = "INSERT INTO {$this->name} (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
-
-        $params = [];
-        foreach ($data as $column => $value) {
-            $params[":{$column}"] = $value;
+        if (empty($this->wheres)) {
+            return ['', []];
         }
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+        $conditions = [];
+        $params = [];
 
-        return (int) $this->pdo->lastInsertId();
+        foreach ($this->wheres as $index => $where) {
+            $paramName = ":{$where['column']}_{$index}";
+            $conditions[] = "{$where['column']} {$where['operator']} {$paramName}";
+            $params[$paramName] = $where['value'];
+        }
+
+        return [implode(' AND ', $conditions), $params];
+    }
+
+    /**
+     * بازنشانی شرایط
+     */
+    private function reset(): void
+    {
+        $this->wheres = [];
+        $this->params = [];
+        $this->orders = null;
+        $this->limit = null;
+        $this->offset = null;
     }
 
     /**
@@ -392,41 +346,6 @@ class Table
     }
 
     /**
-     * ساخت بخش WHERE کوئری
-     *
-     * @return array
-     */
-    private function buildWhere(): array
-    {
-        if (empty($this->wheres)) {
-            return ['', []];
-        }
-
-        $conditions = [];
-        $params = [];
-
-        foreach ($this->wheres as $index => $where) {
-            $paramName = ":{$where['column']}_{$index}";
-            $conditions[] = "{$where['column']} {$where['operator']} {$paramName}";
-            $params[$paramName] = $where['value'];
-        }
-
-        return [implode(' AND ', $conditions), $params];
-    }
-
-    /**
-     * بازنشانی شرایط
-     */
-    private function reset(): void
-    {
-        $this->wheres = [];
-        $this->params = [];
-        $this->orders = null;
-        $this->limit = null;
-        $this->offset = null;
-    }
-
-    /**
      * شمارش تعداد رکوردها
      *
      * @return int
@@ -447,7 +366,7 @@ class Table
         $this->reset();
 
         $result = $stmt->fetch();
-        return (int) $result['count'];
+        return (int)$result['count'];
     }
 
     /**
@@ -472,5 +391,86 @@ class Table
         $insertData = array_merge($search, $data);
         $id = $this->insert($insertData);
         return $this->find($id);
+    }
+
+    /**
+     * افزودن شرط where
+     *
+     * @param string $column نام ستون
+     * @param mixed $value مقدار
+     * @return $this
+     */
+    public function where(string $column, $value): self
+    {
+        $this->wheres[] = [
+            'column' => $column,
+            'operator' => '=',
+            'value' => $value
+        ];
+        return $this;
+    }
+
+    /**
+     * دریافت اولین رکورد براساس شرایط
+     *
+     * @return array|null
+     */
+    public function first(): ?array
+    {
+        $this->limit(1);
+        $results = $this->get();
+        return !empty($results) ? $results[0] : null;
+    }
+
+    /**
+     * محدود کردن نتایج
+     *
+     * @param int $limit تعداد
+     * @return $this
+     */
+    public function limit(int $limit): self
+    {
+        $this->limit = $limit;
+        return $this;
+    }
+
+    /**
+     * درج رکورد جدید
+     *
+     * @param array $data داده‌ها
+     * @return int ID رکورد جدید
+     */
+    public function insert(array $data): int
+    {
+        $columns = array_keys($data);
+        $placeholders = array_map(function ($col) {
+            return ":{$col}";
+        }, $columns);
+
+        $sql = "INSERT INTO {$this->name} (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
+
+        $params = [];
+        foreach ($data as $column => $value) {
+            $params[":{$column}"] = $value;
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    /**
+     * یافتن یک رکورد با ID
+     *
+     * @param int|string $id شناسه
+     * @return array|null
+     */
+    public function find($id): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->name} WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $id]);
+        $result = $stmt->fetch();
+        return $result ?: null;
     }
 }

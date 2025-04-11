@@ -1,10 +1,12 @@
 # مسیریابی (Routing)
 
-مسیریابی یکی از مهم‌ترین بخش‌های هر فریمورک وب است. در فلسک‌پی‌اچ‌پی، سیستم مسیریابی سبک و انعطاف‌پذیری ارائه شده که به شما امکان می‌دهد مسیرهای برنامه خود را به راحتی تعریف و مدیریت کنید.
+مسیریابی یکی از مهم‌ترین بخش‌های هر فریمورک وب است. در فلسک‌پی‌اچ‌پی، سیستم مسیریابی سبک و انعطاف‌پذیری ارائه شده که به
+شما امکان می‌دهد مسیرهای برنامه خود را به راحتی تعریف و مدیریت کنید.
 
 ## مفاهیم اولیه
 
-مسیریابی در فلسک‌پی‌اچ‌پی، فرآیند تطبیق درخواست HTTP ورودی با یک تابع پاسخگو (handler) است. هر مسیر از دو بخش اصلی تشکیل می‌شود:
+مسیریابی در فلسک‌پی‌اچ‌پی، فرآیند تطبیق درخواست HTTP ورودی با یک تابع پاسخگو (handler) است. هر مسیر از دو بخش اصلی تشکیل
+می‌شود:
 
 1. **الگوی مسیر (Path Pattern)**: یک الگوی URI که با درخواست ورودی مطابقت داده می‌شود.
 2. **تابع پاسخگو (Handler)**: تابعی که در صورت تطبیق الگو با درخواست، اجرا می‌شود.
@@ -19,7 +21,8 @@ $app->get('/about', function(Request $request, Response $response) {
 });
 ```
 
-این کد یک مسیر برای متد HTTP GET و مسیر `/about` تعریف می‌کند. زمانی که کاربر به این مسیر درخواست می‌دهد، تابع تعریف شده اجرا می‌شود و متن "درباره ما" به عنوان پاسخ ارسال می‌شود.
+این کد یک مسیر برای متد HTTP GET و مسیر `/about` تعریف می‌کند. زمانی که کاربر به این مسیر درخواست می‌دهد، تابع تعریف شده
+اجرا می‌شود و متن "درباره ما" به عنوان پاسخ ارسال می‌شود.
 
 ## متدهای HTTP
 
@@ -59,7 +62,9 @@ $app->options('/users', function(Request $request, Response $response) {
 
 ## مسیرهای پارامتری
 
-اکثر برنامه‌ها نیاز دارند که بخشی از مسیر به عنوان پارامتر باشد. مثلاً برای نمایش اطلاعات یک کاربر خاص، نیاز به شناسه آن کاربر داریم. در فلسک‌پی‌اچ‌پی می‌توانید با قرار دادن نام پارامتر داخل آکولاد `{}` در مسیر، پارامترهای مسیر را تعریف کنید:
+اکثر برنامه‌ها نیاز دارند که بخشی از مسیر به عنوان پارامتر باشد. مثلاً برای نمایش اطلاعات یک کاربر خاص، نیاز به شناسه آن
+کاربر داریم. در فلسک‌پی‌اچ‌پی می‌توانید با قرار دادن نام پارامتر داخل آکولاد `{}` در مسیر، پارامترهای مسیر را تعریف
+کنید:
 
 ```php
 $app->get('/users/{id}', function(Request $request, Response $response) {
@@ -122,7 +127,8 @@ $router->addRoute('GET', '/users/by-username/{username:[a-zA-Z]+}', function(Req
 
 ### تطبیق همه مسیرها
 
-گاهی اوقات می‌خواهید یک مسیر را تعریف کنید که همه مسیرهای زیرمجموعه یک مسیر خاص را پوشش دهد. می‌توانید از یک پارامتر خاص استفاده کنید:
+گاهی اوقات می‌خواهید یک مسیر را تعریف کنید که همه مسیرهای زیرمجموعه یک مسیر خاص را پوشش دهد. می‌توانید از یک پارامتر خاص
+استفاده کنید:
 
 ```php
 $app->get('/files/{path:.*}', function(Request $request, Response $response) {
@@ -131,7 +137,8 @@ $app->get('/files/{path:.*}', function(Request $request, Response $response) {
 });
 ```
 
-این مسیر با هر مسیری که با `/files/` شروع شود تطبیق داده می‌شود، مثلاً `/files/images/logo.png` یا `/files/documents/report.pdf`.
+این مسیر با هر مسیری که با `/files/` شروع شود تطبیق داده می‌شود، مثلاً `/files/images/logo.png` یا
+`/files/documents/report.pdf`.
 
 ## گروه‌بندی مسیرها
 
@@ -161,7 +168,8 @@ $app->group('/api', function($group) {
 
 ## نام‌گذاری مسیرها
 
-نام‌گذاری مسیرها به شما کمک می‌کند در جاهای مختلف برنامه، به مسیرها ارجاع دهید بدون اینکه نیاز باشد مسیر دقیق را به خاطر داشته باشید.
+نام‌گذاری مسیرها به شما کمک می‌کند در جاهای مختلف برنامه، به مسیرها ارجاع دهید بدون اینکه نیاز باشد مسیر دقیق را به خاطر
+داشته باشید.
 
 > نکته: این ویژگی در نسخه‌های آینده فلسک‌پی‌اچ‌پی اضافه خواهد شد.
 
@@ -192,7 +200,8 @@ $app->get('/debug', function(Request $request, Response $response) {
 
 ## مسیرهای با Middleware
 
-می‌توانید میان‌افزارهای خاص را فقط برای مسیرهای مشخص اعمال کنید. این به شما امکان می‌دهد عملیات پیش‌پردازش و پس‌پردازش را فقط برای برخی مسیرها انجام دهید:
+می‌توانید میان‌افزارهای خاص را فقط برای مسیرهای مشخص اعمال کنید. این به شما امکان می‌دهد عملیات پیش‌پردازش و پس‌پردازش
+را فقط برای برخی مسیرها انجام دهید:
 
 ```php
 // تعریف یک میان‌افزار احراز هویت
@@ -247,7 +256,8 @@ $routes = $router->getRoutes();
 
 ## مسیریابی با کلاس‌های کنترلر
 
-در پروژه‌های بزرگ‌تر، بهتر است از کلاس‌های کنترلر برای مدیریت منطق برنامه استفاده کنید. فلسک‌پی‌اچ‌پی به شما امکان می‌دهد تا به جای توابع، از کلاس‌ها و متدهای آن‌ها به عنوان handler مسیر استفاده کنید:
+در پروژه‌های بزرگ‌تر، بهتر است از کلاس‌های کنترلر برای مدیریت منطق برنامه استفاده کنید. فلسک‌پی‌اچ‌پی به شما امکان
+می‌دهد تا به جای توابع، از کلاس‌ها و متدهای آن‌ها به عنوان handler مسیر استفاده کنید:
 
 ```php
 // تعریف یک کلاس کنترلر
@@ -290,7 +300,7 @@ class UserController
         }
         
         // ایجاد کاربر جدید
-        $id = (new \FlaskPHP\Database\QueryBuilder('users'))->insert($data);
+        $id = (new \PLHask\Database\QueryBuilder('users'))->insert($data);
         
         return $response->status(201)->json([
             'message' => 'کاربر با موفقیت ایجاد شد',
@@ -307,7 +317,8 @@ $app->post('/users', [UserController::class, 'store']);
 
 ## تعریف مسیرهای REST کامل
 
-برای API‌های RESTful، معمولاً نیاز دارید مجموعه‌ای از مسیرها را برای یک منبع تعریف کنید. فلسک‌پی‌اچ‌پی قصد دارد در نسخه‌های آینده این قابلیت را ارائه دهد:
+برای API‌های RESTful، معمولاً نیاز دارید مجموعه‌ای از مسیرها را برای یک منبع تعریف کنید. فلسک‌پی‌اچ‌پی قصد دارد در
+نسخه‌های آینده این قابلیت را ارائه دهد:
 
 ```php
 // تعریف مسیرهای REST برای منبع "users"
@@ -368,7 +379,8 @@ $app->get('/search', function(Request $request, Response $response) {
 });
 ```
 
-با این مسیر، درخواست `/search?q=موبایل&category=electronics` منجر به نمایش "جستجو برای: موبایل در دسته: electronics" می‌شود.
+با این مسیر، درخواست `/search?q=موبایل&category=electronics` منجر به نمایش "جستجو برای: موبایل در دسته: electronics"
+می‌شود.
 
 ### انتقال پارامترها به اعضای تیم
 
@@ -421,7 +433,7 @@ $app->post('/login', function(Request $request, Response $response) {
 def show_user(user_id):
     return f"User: {user_id}"
 
-# FlaskPHP
+# PLHask
 $app->get('/users/{userId}', function(Request $request, Response $response) {
     $userId = $request->param('userId');
     return $response->text("User: {$userId}");
@@ -434,7 +446,7 @@ $app->get('/users/{userId}', function(Request $request, Response $response) {
 // Laravel
 Route::get('/users/{id}', [UserController::class, 'show']);
 
-// FlaskPHP
+// PLHask
 $app->get('/users/{id}', [UserController::class, 'show']);
 ```
 
@@ -447,11 +459,17 @@ app.get('/users/:id', (req, res) => {
     res.send(`User: ${userId}`);
 });
 
-// FlaskPHP
-$app->get('/users/{id}', function(Request $request, Response $response) {
+// PLHask
+$app->get('/users/{id}', function (Request
+$request, Response
+$response
+)
+{
     $userId = $request->param('id');
     return $response->text("User: {$userId}");
-});
+}
+)
+;
 ```
 
 ## عیب‌یابی مسیریابی
@@ -462,7 +480,8 @@ $app->get('/users/{id}', function(Request $request, Response $response) {
 
 اگر مسیر شما تطبیق داده نمی‌شود، موارد زیر را بررسی کنید:
 
-1. **اسلش در ابتدا و انتها**: اطمینان حاصل کنید که مسیرها با اسلش `/` شروع می‌شوند اما با اسلش تمام نمی‌شوند (مگر اینکه مسیر اصلی `/` باشد).
+1. **اسلش در ابتدا و انتها**: اطمینان حاصل کنید که مسیرها با اسلش `/` شروع می‌شوند اما با اسلش تمام نمی‌شوند (مگر اینکه
+   مسیر اصلی `/` باشد).
 2. **حساسیت به بزرگی و کوچکی حروف**: مسیرها به بزرگی و کوچکی حروف حساس هستند، بنابراین `/users` و `/Users` متفاوت هستند.
 3. **الگوی regex**: اگر از الگوهای regex استفاده می‌کنید، اطمینان حاصل کنید که صحیح هستند.
 
@@ -470,7 +489,8 @@ $app->get('/users/{id}', function(Request $request, Response $response) {
 
 اگر همه درخواست‌ها با خطای 404 مواجه می‌شوند، موارد زیر را بررسی کنید:
 
-1. **تنظیمات RewriteRule**: اگر از Apache استفاده می‌کنید، اطمینان حاصل کنید که فایل `.htaccess` درست تنظیم شده و `mod_rewrite` فعال است.
+1. **تنظیمات RewriteRule**: اگر از Apache استفاده می‌کنید، اطمینان حاصل کنید که فایل `.htaccess` درست تنظیم شده و
+   `mod_rewrite` فعال است.
 2. **تنظیمات Nginx**: اگر از Nginx استفاده می‌کنید، تنظیمات `try_files` را بررسی کنید.
 3. **فراخوانی run()**: اطمینان حاصل کنید که متد `run()` در انتهای فایل `index.php` فراخوانی شده است.
 
@@ -489,7 +509,7 @@ $app->get('/users/{id}', function(Request $request, Response $response) {
 // صفحه اصلی
 $app->get('/', function(Request $request, Response $response) {
     // دریافت آخرین مقالات
-    $posts = (new \FlaskPHP\Database\QueryBuilder('posts'))
+    $posts = (new \PLHask\Database\QueryBuilder('posts'))
         ->orderBy('created_at', 'DESC')
         ->limit(5)
         ->get();
@@ -509,7 +529,7 @@ $app->get('/posts/{id}', function(Request $request, Response $response) {
     $id = $request->param('id');
     
     // دریافت مقاله
-    $post = (new \FlaskPHP\Database\QueryBuilder('posts'))
+    $post = (new \PLHask\Database\QueryBuilder('posts'))
         ->where('id', $id)
         ->first();
         
@@ -530,7 +550,7 @@ $app->get('/categories/{categorySlug}', function(Request $request, Response $res
     $categorySlug = $request->param('categorySlug');
     
     // دریافت دسته‌بندی
-    $category = (new \FlaskPHP\Database\QueryBuilder('categories'))
+    $category = (new \PLHask\Database\QueryBuilder('categories'))
         ->where('slug', $categorySlug)
         ->first();
         
@@ -539,7 +559,7 @@ $app->get('/categories/{categorySlug}', function(Request $request, Response $res
     }
     
     // دریافت مقالات این دسته‌بندی
-    $posts = (new \FlaskPHP\Database\QueryBuilder('posts'))
+    $posts = (new \PLHask\Database\QueryBuilder('posts'))
         ->where('category_id', $category['id'])
         ->orderBy('created_at', 'DESC')
         ->get();
@@ -570,7 +590,7 @@ $app->post('/api/register', function(Request $request, Response $response) {
     }
     
     // بررسی تکراری بودن ایمیل
-    $existingUser = (new \FlaskPHP\Database\QueryBuilder('users'))
+    $existingUser = (new \PLHask\Database\QueryBuilder('users'))
         ->where('email', $data['email'])
         ->first();
         
@@ -584,7 +604,7 @@ $app->post('/api/register', function(Request $request, Response $response) {
     $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
     
     // ایجاد کاربر جدید
-    $userId = (new \FlaskPHP\Database\QueryBuilder('users'))->insert($data);
+    $userId = (new \PLHask\Database\QueryBuilder('users'))->insert($data);
     
     // ایجاد توکن (در واقعیت باید از JWT استفاده کنید)
     $token = bin2hex(random_bytes(32));
@@ -612,7 +632,7 @@ $app->post('/api/login', function(Request $request, Response $response) {
     }
     
     // یافتن کاربر
-    $user = (new \FlaskPHP\Database\QueryBuilder('users'))
+    $user = (new \PLHask\Database\QueryBuilder('users'))
         ->where('email', $data['email'])
         ->first();
         

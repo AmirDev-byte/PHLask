@@ -13,18 +13,18 @@ use PHLask\Http\Response;
 $app = new App();
 
 // مسیر ساده
-$app->get('/', function(Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response) {
     return $response->text('Hello World!');
 });
 
 // مسیر با پارامتر
-$app->get('/hello/{name}', function(Request $request, Response $response) {
+$app->get('/hello/{name}', function (Request $request, Response $response) {
     $name = $request->param('name', 'Guest');
     return $response->text("Hello, {$name}!");
 });
 
 // برگرداندن JSON
-$app->get('/api/info', function(Request $request, Response $response) {
+$app->get('/api/info', function (Request $request, Response $response) {
     return $response->json([
         'name' => 'PHLask',
         'version' => '1.0.0',
@@ -39,7 +39,7 @@ $app->get('/api/info', function(Request $request, Response $response) {
 });
 
 // میان‌افزار ساده
-$app->middleware(function(Request $request, callable $next) {
+$app->middleware(function (Request $request, callable $next) {
     // قبل از اجرای درخواست
     $startTime = microtime(true);
 

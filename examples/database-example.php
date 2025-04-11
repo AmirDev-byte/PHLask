@@ -23,7 +23,7 @@ $app->enableDatabase([
 ]);
 
 // دریافت لیست کاربران
-$app->get('/users', function(Request $request) use ($app) {
+$app->get('/users', function (Request $request) use ($app) {
     // استفاده از QueryBuilder
     $query = $app->db()->table('users');
 
@@ -36,8 +36,8 @@ $app->get('/users', function(Request $request) use ($app) {
     $query->orderBy('id', 'DESC');
 
     // اعمال صفحه‌بندی
-    $page = (int) $request->query('page', 1);
-    $perPage = (int) $request->query('per_page', 10);
+    $page = (int)$request->query('page', 1);
+    $perPage = (int)$request->query('per_page', 10);
     $query->paginate($page, $perPage);
 
     // اجرای کوئری
@@ -56,7 +56,7 @@ $app->get('/users', function(Request $request) use ($app) {
 });
 
 // دریافت اطلاعات یک کاربر
-$app->get('/users/{id}', function(Request $request) use ($app) {
+$app->get('/users/{id}', function (Request $request) use ($app) {
     $id = $request->param('id');
 
     $user = $app->db()->table('users')
@@ -71,7 +71,7 @@ $app->get('/users/{id}', function(Request $request) use ($app) {
 });
 
 // ایجاد کاربر جدید
-$app->post('/users', function(Request $request) use ($app) {
+$app->post('/users', function (Request $request) use ($app) {
     $data = $request->all();
 
     // اعتبارسنجی داده‌ها
@@ -89,7 +89,7 @@ $app->post('/users', function(Request $request) use ($app) {
 });
 
 // به‌روزرسانی کاربر
-$app->put('/users/{id}', function(Request $request) use ($app) {
+$app->put('/users/{id}', function (Request $request) use ($app) {
     $id = $request->param('id');
     $data = $request->all();
 
@@ -104,7 +104,7 @@ $app->put('/users/{id}', function(Request $request) use ($app) {
 });
 
 // حذف کاربر
-$app->delete('/users/{id}', function(Request $request) use ($app) {
+$app->delete('/users/{id}', function (Request $request) use ($app) {
     $id = $request->param('id');
 
     $app->db()->table('users')

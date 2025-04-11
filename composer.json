@@ -21,7 +21,7 @@
   },
   "autoload": {
     "psr-4": {
-      "FlaskPHP\\": "src/"
+      "PLHask\\": "src/"
     }
   },
   "require-dev": {
@@ -42,9 +42,9 @@
     "router",
     "middleware"
   ],
-  "homepage": "https://github.com/amirdev-byte/flask-php",
+  "homepage": "https://github.com/amirdev-byte/phlask",
   "support": {
-    "issues": "https://github.com/amirdev-byte/flask-php/issues",
-    "source": "https://github.com/amirdev-byte/flask-php"
+    "issues": "https://github.com/amirdev-byte/phlask/issues",
+    "source": "https://github.com/amirdev-byte/phlask"
   }
 }

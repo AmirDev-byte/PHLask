@@ -77,7 +77,7 @@ class CorsMiddleware implements MiddlewareInterface
         }
 
         // تنظیم مدت اعتبار پاسخ preflight
-        $response = $response->withHeader('Access-Control-Max-Age', (string) $this->options['maxAge']);
+        $response = $response->withHeader('Access-Control-Max-Age', (string)$this->options['maxAge']);
 
         return $response;
     }

@@ -207,7 +207,7 @@ function transactionExample()
     try {
         $connection = Connection::connection();
 
-        $result = $connection->transaction(function($conn) {
+        $result = $connection->transaction(function ($conn) {
             // ایجاد کاربر اول
             $user1 = User::create([
                 'name' => 'Transaction User 1',

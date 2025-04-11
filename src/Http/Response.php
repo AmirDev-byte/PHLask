@@ -13,31 +13,6 @@ use Psr\Http\Message\StreamInterface;
 class Response implements ResponseInterface
 {
     /**
-     * @var string نسخه پروتکل HTTP
-     */
-    private string $protocolVersion = '1.1';
-
-    /**
-     * @var array هدرهای پاسخ
-     */
-    private array $headers = [];
-
-    /**
-     * @var StreamInterface بدنه پاسخ
-     */
-    private StreamInterface $body;
-
-    /**
-     * @var int کد وضعیت HTTP
-     */
-    private int $statusCode;
-
-    /**
-     * @var string توضیح وضعیت HTTP
-     */
-    private string $reasonPhrase = '';
-
-    /**
      * @var array لیست توضیحات وضعیت HTTP استاندارد
      */
     private const PHRASES = [
@@ -89,6 +64,26 @@ class Response implements ResponseInterface
         505 => 'HTTP Version Not Supported',
         511 => 'Network Authentication Required',
     ];
+    /**
+     * @var string نسخه پروتکل HTTP
+     */
+    private string $protocolVersion = '1.1';
+    /**
+     * @var array هدرهای پاسخ
+     */
+    private array $headers = [];
+    /**
+     * @var StreamInterface بدنه پاسخ
+     */
+    private StreamInterface $body;
+    /**
+     * @var int کد وضعیت HTTP
+     */
+    private int $statusCode;
+    /**
+     * @var string توضیح وضعیت HTTP
+     */
+    private string $reasonPhrase = '';
 
     /**
      * سازنده کلاس Response
@@ -100,12 +95,13 @@ class Response implements ResponseInterface
      * @param string $reasonPhrase توضیح وضعیت
      */
     public function __construct(
-        int $statusCode = 200,
-        array $headers = [],
+        int              $statusCode = 200,
+        array            $headers = [],
         ?StreamInterface $body = null,
-        string $version = '1.1',
-        string $reasonPhrase = ''
-    ) {
+        string           $version = '1.1',
+        string           $reasonPhrase = ''
+    )
+    {
         $this->statusCode = $statusCode;
         $this->headers = $headers;
         $this->body = $body ?? new Stream(fopen('php://temp', 'r+'));
@@ -131,6 +127,26 @@ class Response implements ResponseInterface
         return $this
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withBody($body);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withBody(StreamInterface $body): self
+    {
+        $clone = clone $this;
+        $clone->body = $body;
+        return $clone;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withHeader($name, $value): self
+    {
+        $clone = clone $this;
+        $clone->headers[$name] = is_array($value) ? $value : [$value];
+        return $clone;
     }
 
     /**
@@ -165,6 +181,8 @@ class Response implements ResponseInterface
             ->withBody($body);
     }
 
+    // --------------------- پیاده‌سازی متدهای PSR-7 ---------------------
+
     /**
      * هدایت به مسیر دیگر
      *
@@ -177,6 +195,25 @@ class Response implements ResponseInterface
         return $this
             ->withStatus($statusCode)
             ->withHeader('Location', $url);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withStatus($code, $reasonPhrase = ''): self
+    {
+        $clone = clone $this;
+        $clone->statusCode = (int)$code;
+
+        if (!empty($reasonPhrase)) {
+            $clone->reasonPhrase = $reasonPhrase;
+        } elseif (isset(self::PHRASES[$code])) {
+            $clone->reasonPhrase = self::PHRASES[$code];
+        } else {
+            $clone->reasonPhrase = '';
+        }
+
+        return $clone;
     }
 
     /**
@@ -209,7 +246,13 @@ class Response implements ResponseInterface
         exit;
     }
 
-    // --------------------- پیاده‌سازی متدهای PSR-7 ---------------------
+    /**
+     * @inheritDoc
+     */
+    public function getBody(): StreamInterface
+    {
+        return $this->body;
+    }
 
     /**
      * @inheritDoc
@@ -240,15 +283,13 @@ class Response implements ResponseInterface
     /**
      * @inheritDoc
      */
-    public function hasHeader($name): bool
+    public function getHeaderLine($name): string
     {
-        $name = strtolower($name);
-        foreach ($this->headers as $key => $value) {
-            if (strtolower($key) === $name) {
-                return true;
-            }
+        $header = $this->getHeader($name);
+        if (empty($header)) {
+            return '';
         }
-        return false;
+        return implode(', ', $header);
     }
 
     /**
@@ -263,28 +304,6 @@ class Response implements ResponseInterface
             }
         }
         return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getHeaderLine($name): string
-    {
-        $header = $this->getHeader($name);
-        if (empty($header)) {
-            return '';
-        }
-        return implode(', ', $header);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withHeader($name, $value): self
-    {
-        $clone = clone $this;
-        $clone->headers[$name] = is_array($value) ? $value : [$value];
-        return $clone;
     }
 
     /**
@@ -314,6 +333,20 @@ class Response implements ResponseInterface
     /**
      * @inheritDoc
      */
+    public function hasHeader($name): bool
+    {
+        $name = strtolower($name);
+        foreach ($this->headers as $key => $value) {
+            if (strtolower($key) === $name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function withoutHeader($name): self
     {
         $clone = clone $this;
@@ -332,46 +365,9 @@ class Response implements ResponseInterface
     /**
      * @inheritDoc
      */
-    public function getBody(): StreamInterface
-    {
-        return $this->body;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withBody(StreamInterface $body): self
-    {
-        $clone = clone $this;
-        $clone->body = $body;
-        return $clone;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getStatusCode(): int
     {
         return $this->statusCode;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withStatus($code, $reasonPhrase = ''): self
-    {
-        $clone = clone $this;
-        $clone->statusCode = (int) $code;
-
-        if (!empty($reasonPhrase)) {
-            $clone->reasonPhrase = $reasonPhrase;
-        } elseif (isset(self::PHRASES[$code])) {
-            $clone->reasonPhrase = self::PHRASES[$code];
-        } else {
-            $clone->reasonPhrase = '';
-        }
-
-        return $clone;
     }
 
     /**

@@ -41,7 +41,7 @@ phpinfo();
 ساده‌ترین راه برای نصب فلسک‌پی‌اچ‌پی استفاده از Composer است:
 
 ```bash
-composer require amirdev-byte/flask-php
+composer require amirdev-byte/phlask
 ```
 
 این دستور، فلسک‌پی‌اچ‌پی و تمام وابستگی‌های آن را نصب می‌کند.
@@ -50,7 +50,7 @@ composer require amirdev-byte/flask-php
 
 اگر به هر دلیلی نمی‌خواهید از Composer استفاده کنید، می‌توانید به صورت دستی نصب کنید:
 
-1. آخرین نسخه را از [صفحه Releases](https://github.com/amirdev-byte/flask-php/releases) دانلود کنید.
+1. آخرین نسخه را از [صفحه Releases](https://github.com/amirdev-byte/phlask/releases) دانلود کنید.
 2. فایل دانلود شده را استخراج کنید.
 3. پوشه استخراج شده را به مسیر پروژه خود منتقل کنید.
 4. از autoloader خود برای بارگذاری کلاس‌ها استفاده کنید.
@@ -74,18 +74,18 @@ cd my-flask-app
 
 ```json
 {
-    "name": "yourname/my-flask-app",
-    "description": "My first PHLask application",
-    "type": "project",
-    "require": {
-        "php": ">=7.4",
-        "amirdev-byte/flask-php": "^1.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/"
-        }
+  "name": "yourname/my-flask-app",
+  "description": "My first PHLask application",
+  "type": "project",
+  "require": {
+    "php": ">=7.4",
+    "amirdev-byte/phlask": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
     }
+  }
 }
 ```
 
@@ -217,8 +217,8 @@ php -S localhost:8000
 
 ```json
 {
-    "message": "به برنامه فلسک‌پی‌اچ‌پی من خوش آمدید!",
-    "status": "running"
+  "message": "به برنامه فلسک‌پی‌اچ‌پی من خوش آمدید!",
+  "status": "running"
 }
 ```
 
@@ -253,4 +253,5 @@ php -S localhost:8000
 
 ## گام بعدی
 
-اکنون که فلسک‌پی‌اچ‌پی را نصب کردید، می‌توانید به راهنمای [شروع سریع](quick-start.md) مراجعه کنید تا با مفاهیم اصلی فریمورک آشنا شوید و اولین API خود را بسازید.
+اکنون که فلسک‌پی‌اچ‌پی را نصب کردید، می‌توانید به راهنمای [شروع سریع](quick-start.md) مراجعه کنید تا با مفاهیم اصلی
+فریمورک آشنا شوید و اولین API خود را بسازید.

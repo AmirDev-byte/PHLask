@@ -2,7 +2,6 @@
 
 namespace PHLask\Middleware;
 
-use PHLask\Http\Request;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

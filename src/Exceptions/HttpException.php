@@ -28,35 +28,16 @@ class HttpException extends \Exception
      * @param \Throwable|null $previous خطای قبلی
      */
     public function __construct(
-        int $statusCode = 500,
-        string $message = '',
-        ?array $details = null,
+        int         $statusCode = 500,
+        string      $message = '',
+        ?array      $details = null,
         ?\Throwable $previous = null
-    ) {
+    )
+    {
         $this->statusCode = $statusCode;
         $this->details = $details;
 
         parent::__construct($message, $statusCode, $previous);
-    }
-
-    /**
-     * دریافت کد وضعیت HTTP
-     *
-     * @return int
-     */
-    public function getStatusCode(): int
-    {
-        return $this->statusCode;
-    }
-
-    /**
-     * دریافت اطلاعات اضافی خطا
-     *
-     * @return array|null
-     */
-    public function getDetails(): ?array
-    {
-        return $this->details;
     }
 
     /**
@@ -153,5 +134,25 @@ class HttpException extends \Exception
     public static function internalServerError(string $message = 'Internal Server Error', ?array $details = null): self
     {
         return new self(500, $message, $details);
+    }
+
+    /**
+     * دریافت کد وضعیت HTTP
+     *
+     * @return int
+     */
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
+    }
+
+    /**
+     * دریافت اطلاعات اضافی خطا
+     *
+     * @return array|null
+     */
+    public function getDetails(): ?array
+    {
+        return $this->details;
     }
 }

@@ -8,7 +8,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 /**
  * کلاس SimpleFlask - رابط ساده برای استفاده از PHLask
  */
-class SimpleFlask {
+class SimpleFlask
+{
     /**
      * @var \PDO اتصال پایگاه داده
      */
@@ -27,7 +28,8 @@ class SimpleFlask {
     /**
      * سازنده کلاس
      */
-    public function __construct() {
+    public function __construct()
+    {
         // در صورت نیاز، تنظیمات اولیه انجام می‌شود
     }
 
@@ -38,7 +40,8 @@ class SimpleFlask {
      * @param array $config تنظیمات اتصال
      * @return $this
      */
-    public function connectDB($type, $config = []) {
+    public function connectDB($type, $config = [])
+    {
         if ($type === 'sqlite') {
             $path = $config['path'] ?? ':memory:';
             $this->db = new \PDO('sqlite:' . $path);
@@ -67,7 +70,8 @@ class SimpleFlask {
      * @param callable $callback تابع پاسخگو
      * @return $this
      */
-    public function get($path, $callback) {
+    public function get($path, $callback)
+    {
         $this->routes['GET'][$path] = $callback;
         return $this;
     }
@@ -79,7 +83,8 @@ class SimpleFlask {
      * @param callable $callback تابع پاسخگو
      * @return $this
      */
-    public function post($path, $callback) {
+    public function post($path, $callback)
+    {
         $this->routes['POST'][$path] = $callback;
         return $this;
     }
@@ -91,7 +96,8 @@ class SimpleFlask {
      * @param mixed $default مقدار پیش‌فرض
      * @return mixed
      */
-    public function input($name, $default = null) {
+    public function input($name, $default = null)
+    {
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
 
@@ -102,7 +108,8 @@ class SimpleFlask {
      * @param mixed $value مقدار متغیر
      * @return $this
      */
-    public function set($name, $value) {
+    public function set($name, $value)
+    {
         $this->vars[$name] = $value;
         return $this;
     }
@@ -114,7 +121,8 @@ class SimpleFlask {
      * @param array $data داده‌های اضافی
      * @return string
      */
-    public function view($template, $data = []) {
+    public function view($template, $data = [])
+    {
         // ترکیب داده‌های تنظیم شده با داده‌های ارسالی
         $data = array_merge($this->vars, $data);
 
@@ -137,7 +145,8 @@ class SimpleFlask {
      * @param string $table نام جدول
      * @return TableHelper
      */
-    public function table($table) {
+    public function table($table)
+    {
         if ($this->db === null) {
             throw new \Exception('Database connection is not established. Call connectDB() first.');
         }
@@ -152,7 +161,8 @@ class SimpleFlask {
      * @param array $params پارامترها
      * @return array نتیجه کوئری
      */
-    public function query($query, $params = []) {
+    public function query($query, $params = [])
+    {
         if ($this->db === null) {
             throw new \Exception('Database connection is not established. Call connectDB() first.');
         }
@@ -167,7 +177,8 @@ class SimpleFlask {
      *
      * @return bool
      */
-    public function beginTransaction() {
+    public function beginTransaction()
+    {
         return $this->db->beginTransaction();
     }
 
@@ -176,7 +187,8 @@ class SimpleFlask {
      *
      * @return bool
      */
-    public function commit() {
+    public function commit()
+    {
         return $this->db->commit();
     }
 
@@ -185,7 +197,8 @@ class SimpleFlask {
      *
      * @return bool
      */
-    public function rollBack() {
+    public function rollBack()
+    {
         return $this->db->rollBack();
     }
 
@@ -194,7 +207,8 @@ class SimpleFlask {
      *
      * @param string $url آدرس مقصد
      */
-    public function redirect($url) {
+    public function redirect($url)
+    {
         header("Location: {$url}");
         exit;
     }
@@ -204,7 +218,8 @@ class SimpleFlask {
      *
      * @param mixed $data داده‌های مورد نظر
      */
-    public function json($data) {
+    public function json($data)
+    {
         header('Content-Type: application/json');
         echo json_encode($data);
         exit;
@@ -213,7 +228,8 @@ class SimpleFlask {
     /**
      * اجرای برنامه
      */
-    public function run() {
+    public function run()
+    {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -232,7 +248,8 @@ class SimpleFlask {
 /**
  * کلاس TableHelper - کمک برای کار با جدول دیتابیس
  */
-class TableHelper {
+class TableHelper
+{
     /**
      * @var string نام جدول
      */
@@ -264,21 +281,10 @@ class TableHelper {
      * @param string $table نام جدول
      * @param \PDO $db اتصال پایگاه داده
      */
-    public function __construct($table, $db) {
+    public function __construct($table, $db)
+    {
         $this->table = $table;
         $this->db = $db;
-    }
-
-    /**
-     * افزودن شرط where
-     *
-     * @param string $column نام ستون
-     * @param mixed $value مقدار
-     * @return $this
-     */
-    public function where($column, $value) {
-        $this->wheres[] = [$column, $value];
-        return $this;
     }
 
     /**
@@ -288,19 +294,9 @@ class TableHelper {
      * @param string $direction جهت مرتب‌سازی
      * @return $this
      */
-    public function orderBy($column, $direction = 'ASC') {
+    public function orderBy($column, $direction = 'ASC')
+    {
         $this->orders[] = [$column, strtoupper($direction)];
-        return $this;
-    }
-
-    /**
-     * محدود کردن نتایج
-     *
-     * @param int $limit تعداد
-     * @return $this
-     */
-    public function limit($limit) {
-        $this->limit = $limit;
         return $this;
     }
 
@@ -309,7 +305,8 @@ class TableHelper {
      *
      * @return array
      */
-    public function all() {
+    public function all()
+    {
         return $this->get();
     }
 
@@ -318,7 +315,8 @@ class TableHelper {
      *
      * @return array
      */
-    public function get() {
+    public function get()
+    {
         $sql = "SELECT * FROM {$this->table}";
         $params = [];
 
@@ -354,59 +352,13 @@ class TableHelper {
     }
 
     /**
-     * دریافت اولین رکورد
-     *
-     * @return array|null
-     */
-    public function first() {
-        $this->limit(1);
-        $results = $this->get();
-        return $results[0] ?? null;
-    }
-
-    /**
-     * یافتن رکورد با شناسه
-     *
-     * @param int|string $id شناسه
-     * @return array|null
-     */
-    public function find($id) {
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
-    }
-
-    /**
-     * درج رکورد جدید
-     *
-     * @param array $data داده‌ها
-     * @return int
-     */
-    public function insert($data) {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-
-        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
-
-        $params = [];
-        foreach ($data as $key => $value) {
-            $params[":{$key}"] = $value;
-        }
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-
-        return (int) $this->db->lastInsertId();
-    }
-
-    /**
      * به‌روزرسانی رکوردها
      *
      * @param array $data داده‌ها
      * @return int
      */
-    public function update($data) {
+    public function update($data)
+    {
         if (empty($this->wheres)) {
             throw new \Exception('Update requires at least one WHERE condition');
         }
@@ -441,7 +393,8 @@ class TableHelper {
      *
      * @return int
      */
-    public function delete() {
+    public function delete()
+    {
         if (empty($this->wheres)) {
             throw new \Exception('Delete requires at least one WHERE condition');
         }
@@ -468,7 +421,8 @@ class TableHelper {
      *
      * @return int
      */
-    public function count() {
+    public function count()
+    {
         $sql = "SELECT COUNT(*) AS count FROM {$this->table}";
         $params = [];
 
@@ -485,7 +439,7 @@ class TableHelper {
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
-        return (int) $stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        return (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
     }
 
     /**
@@ -495,7 +449,8 @@ class TableHelper {
      * @param array $data داده‌های اضافی برای ایجاد
      * @return array
      */
-    public function firstOrCreate($search, $data = []) {
+    public function firstOrCreate($search, $data = [])
+    {
         // بازنشانی شرط‌های قبلی
         $this->wheres = [];
 
@@ -516,5 +471,80 @@ class TableHelper {
         $id = $this->insert($insertData);
 
         return $this->find($id);
+    }
+
+    /**
+     * افزودن شرط where
+     *
+     * @param string $column نام ستون
+     * @param mixed $value مقدار
+     * @return $this
+     */
+    public function where($column, $value)
+    {
+        $this->wheres[] = [$column, $value];
+        return $this;
+    }
+
+    /**
+     * دریافت اولین رکورد
+     *
+     * @return array|null
+     */
+    public function first()
+    {
+        $this->limit(1);
+        $results = $this->get();
+        return $results[0] ?? null;
+    }
+
+    /**
+     * محدود کردن نتایج
+     *
+     * @param int $limit تعداد
+     * @return $this
+     */
+    public function limit($limit)
+    {
+        $this->limit = $limit;
+        return $this;
+    }
+
+    /**
+     * درج رکورد جدید
+     *
+     * @param array $data داده‌ها
+     * @return int
+     */
+    public function insert($data)
+    {
+        $columns = implode(', ', array_keys($data));
+        $placeholders = ':' . implode(', :', array_keys($data));
+
+        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
+
+        $params = [];
+        foreach ($data as $key => $value) {
+            $params[":{$key}"] = $value;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return (int)$this->db->lastInsertId();
+    }
+
+    /**
+     * یافتن رکورد با شناسه
+     *
+     * @param int|string $id شناسه
+     * @return array|null
+     */
+    public function find($id)
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
     }
 }

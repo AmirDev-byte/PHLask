@@ -1,6 +1,7 @@
 # ساختار پروژه
 
-در این بخش با ساختار پیشنهادی پروژه‌های فلسک‌پی‌اچ‌پی آشنا می‌شوید. پیروی از این ساختار به شما کمک می‌کند تا پروژه‌های خود را به روشی منظم و استاندارد سازماندهی کنید، که باعث افزایش قابلیت خوانایی، نگهداری و توسعه پروژه می‌شود.
+در این بخش با ساختار پیشنهادی پروژه‌های فلسک‌پی‌اچ‌پی آشنا می‌شوید. پیروی از این ساختار به شما کمک می‌کند تا پروژه‌های
+خود را به روشی منظم و استاندارد سازماندهی کنید، که باعث افزایش قابلیت خوانایی، نگهداری و توسعه پروژه می‌شود.
 
 ## ساختار پایه
 
@@ -49,8 +50,8 @@ project-root/
   // app/Controllers/UserController.php
   namespace App\Controllers;
   
-  use FlaskPHP\Http\Request;
-  use FlaskPHP\Http\Response;
+  use PLHask\Http\Request;
+  use PLHask\Http\Response;
   
   class UserController
   {
@@ -67,7 +68,7 @@ project-root/
   // app/Models/User.php
   namespace App\Models;
   
-  use FlaskPHP\Database\Model;
+  use PLHask\Database\Model;
   
   class User extends Model
   {
@@ -80,7 +81,7 @@ project-root/
   // app/Middleware/AuthMiddleware.php
   namespace App\Middleware;
   
-  use FlaskPHP\Http\Request;
+  use PLHask\Http\Request;
   
   class AuthMiddleware
   {
@@ -201,7 +202,7 @@ return [
   $dotenv->load();
   
   // ایجاد نمونه برنامه
-  $app = FlaskPHP\App::getInstance();
+  $app = PLHask\App::getInstance();
   
   // بارگذاری مسیرها
   require_once __DIR__ . '/../routes/web.php';
@@ -396,33 +397,33 @@ composer.lock
 
 ```json
 {
-    "name": "your-name/your-project",
-    "description": "Your project description",
-    "type": "project",
-    "require": {
-        "php": ">=7.4",
-        "amirdev-byte/flask-php": "^1.0",
-        "vlucas/phpdotenv": "^5.3"
+  "name": "your-name/your-project",
+  "description": "Your project description",
+  "type": "project",
+  "require": {
+    "php": ">=7.4",
+    "amirdev-byte/phlask": "^1.0",
+    "vlucas/phpdotenv": "^5.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
     },
-    "require-dev": {
-        "phpunit/phpunit": "^9.5"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/"
-        },
-        "files": [
-            "app/Helpers/functions.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "test": "phpunit"
+    "files": [
+      "app/Helpers/functions.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
     }
+  },
+  "scripts": {
+    "test": "phpunit"
+  }
 }
 ```
 
@@ -478,7 +479,8 @@ api-root/
 1. **امنیت**: فقط پوشه `public/` باید از طریق وب سرور قابل دسترسی باشد.
 2. **مجوزها**: اطمینان حاصل کنید که پوشه `storage/` و زیرپوشه‌های آن توسط وب سرور قابل نوشتن هستند.
 3. **اتولودینگ**: از PSR-4 برای اتولودینگ کلاس‌ها استفاده کنید.
-4. **متغیرهای محیطی**: اطلاعات حساس مانند رمزهای عبور پایگاه داده را در فایل `.env` قرار دهید و آن را در کنترل نسخه نگنجانید.
+4. **متغیرهای محیطی**: اطلاعات حساس مانند رمزهای عبور پایگاه داده را در فایل `.env` قرار دهید و آن را در کنترل نسخه
+   نگنجانید.
 5. **کنترل نسخه**: از Git برای کنترل نسخه استفاده کنید و فایل `.gitignore` مناسب ایجاد کنید.
 
 ## نمونه کامل یک پروژه
@@ -537,8 +539,8 @@ my-flask-app/
 // app/Controllers/UserController.php
 namespace App\Controllers;
 
-use FlaskPHP\Http\Request;
-use FlaskPHP\Http\Response;
+use PLHask\Http\Request;
+use PLHask\Http\Response;
 use App\Services\UserService;
 
 class UserController
@@ -594,7 +596,7 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->safeLoad();
 
 // ایجاد نمونه برنامه
-$app = FlaskPHP\App::getInstance();
+$app = PLHask\App::getInstance();
 
 // بارگذاری پیکربندی
 $app->loadConfig(require_once __DIR__ . '/../config/app.php');
