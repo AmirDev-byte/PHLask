@@ -10,7 +10,7 @@
 ### روش 1: استفاده از متد استاتیک connection
 
 ```php
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 
 // ایجاد اتصال پیش‌فرض
 $connection = Connection::connection('default', [
@@ -36,7 +36,7 @@ $connection = Connection::connection('default');
 ### روش 2: ایجاد مستقیم نمونه جدید
 
 ```php
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 
 $connection = new Connection([
     'driver' => 'mysql',
@@ -52,7 +52,7 @@ $connection = new Connection([
 ### روش 3: استفاده از کلاس App
 
 ```php
-use PLHask\App;
+use PHLask\App;
 
 $app = App::getInstance();
 
@@ -342,7 +342,7 @@ $logDb->insert('access_logs', ['user_id' => 1, 'action' => 'login']);
 هنگام کار با پایگاه داده، مدیریت خطاها بسیار مهم است:
 
 ```php
-use PLHask\Exceptions\DatabaseException;
+use PHLask\Exceptions\DatabaseException;
 
 try {
     $users = $connection->fetchAll('SELECT * FROM non_existent_table');

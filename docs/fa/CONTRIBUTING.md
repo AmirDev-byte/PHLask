@@ -130,9 +130,9 @@ git push origin feature/my-new-feature
 نمونه یک تست ساده:
 
 ```php
-namespace Tests\PLHask\Http;
+namespace Tests\PHLask\Http;
 
-use PLHask\Http\Request;
+use PHLask\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 class RequestTest extends TestCase

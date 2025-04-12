@@ -177,7 +177,7 @@ $dbConfig = require_once __DIR__ . '/../config/database.php';
 $mailConfig = require_once __DIR__ . '/../config/mail.php';
 
 // ایجاد نمونه برنامه
-$app = PLHask\App::getInstance();
+$app = PHLask\App::getInstance();
 
 // تنظیم پیکربندی‌ها
 $app->loadConfig($appConfig);
@@ -412,7 +412,7 @@ return [
 $dbConfig = require __DIR__ . '/config/database.php';
 $connection = $dbConfig['connections'][$dbConfig['default']];
 
-$db = new PLHask\Database\Connection($connection);
+$db = new PHLask\Database\Connection($connection);
 ```
 
 ### مثال 2: پیکربندی احراز هویت
@@ -552,7 +552,7 @@ if (file_exists($configPath . $environment . '/app.php')) {
 }
 
 // ایجاد نمونه برنامه
-$app = PLHask\App::getInstance();
+$app = PHLask\App::getInstance();
 $app->loadConfig($appConfig);
 
 // فعال‌سازی حالت دیباگ در محیط‌های غیر تولیدی

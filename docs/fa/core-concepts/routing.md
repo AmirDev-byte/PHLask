@@ -300,7 +300,7 @@ class UserController
         }
         
         // ایجاد کاربر جدید
-        $id = (new \PLHask\Database\QueryBuilder('users'))->insert($data);
+        $id = (new \PHLask\Database\QueryBuilder('users'))->insert($data);
         
         return $response->status(201)->json([
             'message' => 'کاربر با موفقیت ایجاد شد',
@@ -433,7 +433,7 @@ $app->post('/login', function(Request $request, Response $response) {
 def show_user(user_id):
     return f"User: {user_id}"
 
-# PLHask
+# PHLask
 $app->get('/users/{userId}', function(Request $request, Response $response) {
     $userId = $request->param('userId');
     return $response->text("User: {$userId}");
@@ -446,7 +446,7 @@ $app->get('/users/{userId}', function(Request $request, Response $response) {
 // Laravel
 Route::get('/users/{id}', [UserController::class, 'show']);
 
-// PLHask
+// PHLask
 $app->get('/users/{id}', [UserController::class, 'show']);
 ```
 
@@ -459,7 +459,7 @@ app.get('/users/:id', (req, res) => {
     res.send(`User: ${userId}`);
 });
 
-// PLHask
+// PHLask
 $app->get('/users/{id}', function (Request
 $request, Response
 $response
@@ -509,7 +509,7 @@ $response
 // صفحه اصلی
 $app->get('/', function(Request $request, Response $response) {
     // دریافت آخرین مقالات
-    $posts = (new \PLHask\Database\QueryBuilder('posts'))
+    $posts = (new \PHLask\Database\QueryBuilder('posts'))
         ->orderBy('created_at', 'DESC')
         ->limit(5)
         ->get();
@@ -529,7 +529,7 @@ $app->get('/posts/{id}', function(Request $request, Response $response) {
     $id = $request->param('id');
     
     // دریافت مقاله
-    $post = (new \PLHask\Database\QueryBuilder('posts'))
+    $post = (new \PHLask\Database\QueryBuilder('posts'))
         ->where('id', $id)
         ->first();
         
@@ -550,7 +550,7 @@ $app->get('/categories/{categorySlug}', function(Request $request, Response $res
     $categorySlug = $request->param('categorySlug');
     
     // دریافت دسته‌بندی
-    $category = (new \PLHask\Database\QueryBuilder('categories'))
+    $category = (new \PHLask\Database\QueryBuilder('categories'))
         ->where('slug', $categorySlug)
         ->first();
         
@@ -559,7 +559,7 @@ $app->get('/categories/{categorySlug}', function(Request $request, Response $res
     }
     
     // دریافت مقالات این دسته‌بندی
-    $posts = (new \PLHask\Database\QueryBuilder('posts'))
+    $posts = (new \PHLask\Database\QueryBuilder('posts'))
         ->where('category_id', $category['id'])
         ->orderBy('created_at', 'DESC')
         ->get();
@@ -590,7 +590,7 @@ $app->post('/api/register', function(Request $request, Response $response) {
     }
     
     // بررسی تکراری بودن ایمیل
-    $existingUser = (new \PLHask\Database\QueryBuilder('users'))
+    $existingUser = (new \PHLask\Database\QueryBuilder('users'))
         ->where('email', $data['email'])
         ->first();
         
@@ -604,7 +604,7 @@ $app->post('/api/register', function(Request $request, Response $response) {
     $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
     
     // ایجاد کاربر جدید
-    $userId = (new \PLHask\Database\QueryBuilder('users'))->insert($data);
+    $userId = (new \PHLask\Database\QueryBuilder('users'))->insert($data);
     
     // ایجاد توکن (در واقعیت باید از JWT استفاده کنید)
     $token = bin2hex(random_bytes(32));
@@ -632,7 +632,7 @@ $app->post('/api/login', function(Request $request, Response $response) {
     }
     
     // یافتن کاربر
-    $user = (new \PLHask\Database\QueryBuilder('users'))
+    $user = (new \PHLask\Database\QueryBuilder('users'))
         ->where('email', $data['email'])
         ->first();
         

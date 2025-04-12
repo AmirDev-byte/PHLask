@@ -6,7 +6,7 @@
 ## ایجاد یک نمونه از برنامه
 
 ```php
-use PLHask\App;
+use PHLask\App;
 
 // روش 1: ایجاد نمونه جدید
 $app = new App();

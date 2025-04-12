@@ -19,7 +19,7 @@
 ### اتصال به SQLite
 
 ```php
-use PLHask\Database\EasyDB;
+use PHLask\Database\EasyDB;
 
 // اتصال به فایل SQLite
 $db = EasyDB::sqlite(__DIR__ . '/database.sqlite');
@@ -31,7 +31,7 @@ $db = EasyDB::sqlite(':memory:');
 ### اتصال به MySQL
 
 ```php
-use PLHask\Database\EasyDB;
+use PHLask\Database\EasyDB;
 
 // اتصال به MySQL
 $db = EasyDB::mysql(

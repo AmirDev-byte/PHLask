@@ -31,7 +31,7 @@
 ### ایجاد یک استثنای HTTP
 
 ```php
-use PLHask\Exceptions\HttpException;
+use PHLask\Exceptions\HttpException;
 
 // ایجاد استثنا به صورت مستقیم
 throw new HttpException(404, 'صفحه مورد نظر یافت نشد');
@@ -79,7 +79,7 @@ throw HttpException::internalServerError('خطای داخلی سرور');
 برای خطاهای مربوط به پایگاه داده، فلسک‌پی‌اچ‌پی کلاس `DatabaseException` را ارائه می‌دهد:
 
 ```php
-use PLHask\Exceptions\DatabaseException;
+use PHLask\Exceptions\DatabaseException;
 
 // ایجاد استثنای خطای اتصال
 throw DatabaseException::connectionError(
@@ -103,9 +103,9 @@ throw DatabaseException::queryError(
 در فلسک‌پی‌اچ‌پی می‌توانید برای هر کد وضعیت HTTP، یک مدیریت‌کننده خطا تعریف کنید:
 
 ```php
-use PLHask\App;
-use PLHask\Http\Request;
-use PLHask\Http\Response;
+use PHLask\App;
+use PHLask\Http\Request;
+use PHLask\Http\Response;
 
 $app = App::getInstance();
 

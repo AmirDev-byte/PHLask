@@ -18,7 +18,7 @@
 
 ```php
 use PHLask\Database\QueryBuilder;
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 
 // روش 1: ایجاد مستقیم
 $query = new QueryBuilder('users');
@@ -433,7 +433,7 @@ $users = $query->raw('
 برای اطمینان از انسجام داده‌ها، می‌توانید کوئری‌ها را در یک تراکنش اجرا کنید:
 
 ```php
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 
 $connection = Connection::connection();
 

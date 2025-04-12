@@ -223,7 +223,7 @@ $app->get('/hello', function(Request $request, Response $response) {
 می‌توانید نمونه پاسخ را به صورت دستی نیز ایجاد کنید:
 
 ```php
-use PLHask\Http\Response;
+use PHLask\Http\Response;
 
 $response = new Response(200, [
     'Content-Type' => 'text/html; charset=utf-8'
@@ -425,7 +425,7 @@ return $response
 کلاس `Uri` پیاده‌سازی اینترفیس `UriInterface` در PSR-7 است و برای کار با URI استفاده می‌شود:
 
 ```php
-use PLHask\Http\Uri;
+use PHLask\Http\Uri;
 
 // ایجاد یک URI از رشته
 $uri = new Uri('https://example.com/users?page=1');
@@ -451,7 +451,7 @@ $uriString = (string) $newUri; // "http://example.com/products?category=electron
 کلاس `Stream` پیاده‌سازی اینترفیس `StreamInterface` در PSR-7 است و برای کار با داده‌های استریمی استفاده می‌شود:
 
 ```php
-use PLHask\Http\Stream;
+use PHLask\Http\Stream;
 
 // ایجاد یک استریم خالی
 $stream = new Stream(fopen('php://temp', 'r+'));

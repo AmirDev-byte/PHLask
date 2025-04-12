@@ -50,8 +50,8 @@ project-root/
   // app/Controllers/UserController.php
   namespace App\Controllers;
   
-  use PLHask\Http\Request;
-  use PLHask\Http\Response;
+  use PHLask\Http\Request;
+  use PHLask\Http\Response;
   
   class UserController
   {
@@ -68,7 +68,7 @@ project-root/
   // app/Models/User.php
   namespace App\Models;
   
-  use PLHask\Database\Model;
+  use PHLask\Database\Model;
   
   class User extends Model
   {
@@ -81,7 +81,7 @@ project-root/
   // app/Middleware/AuthMiddleware.php
   namespace App\Middleware;
   
-  use PLHask\Http\Request;
+  use PHLask\Http\Request;
   
   class AuthMiddleware
   {
@@ -202,7 +202,7 @@ return [
   $dotenv->load();
   
   // ایجاد نمونه برنامه
-  $app = PLHask\App::getInstance();
+  $app = PHLask\App::getInstance();
   
   // بارگذاری مسیرها
   require_once __DIR__ . '/../routes/web.php';
@@ -539,8 +539,8 @@ my-flask-app/
 // app/Controllers/UserController.php
 namespace App\Controllers;
 
-use PLHask\Http\Request;
-use PLHask\Http\Response;
+use PHLask\Http\Request;
+use PHLask\Http\Response;
 use App\Services\UserService;
 
 class UserController
@@ -596,7 +596,7 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->safeLoad();
 
 // ایجاد نمونه برنامه
-$app = PLHask\App::getInstance();
+$app = PHLask\App::getInstance();
 
 // بارگذاری پیکربندی
 $app->loadConfig(require_once __DIR__ . '/../config/app.php');

@@ -459,7 +459,7 @@ $app->middleware(new CorsMiddleware([
 برای پردازش خودکار بدنه درخواست‌های JSON:
 
 ```php
-use PLHask\Middleware\JsonBodyParserMiddleware;
+use PHLask\Middleware\JsonBodyParserMiddleware;
 
 $app->middleware(new JsonBodyParserMiddleware());
 ```
@@ -469,7 +469,7 @@ $app->middleware(new JsonBodyParserMiddleware());
 برای تنظیم خودکار نوع محتوا در پاسخ:
 
 ```php
-use PLHask\Middleware\ContentTypeMiddleware;
+use PHLask\Middleware\ContentTypeMiddleware;
 
 $app->middleware(new ContentTypeMiddleware('application/json'));
 ```
@@ -479,7 +479,7 @@ $app->middleware(new ContentTypeMiddleware('application/json'));
 برای محدود کردن تعداد درخواست‌ها:
 
 ```php
-use PLHask\Middleware\RateLimitMiddleware;
+use PHLask\Middleware\RateLimitMiddleware;
 
 $app->middleware(new RateLimitMiddleware([
     'limit' => 100, // تعداد درخواست‌های مجاز
@@ -668,7 +668,7 @@ $app->middleware(function(Request $request, callable $next) {
     $compressed = gzencode($body, 9);
     
     // ایجاد بدنه جدید
-    $stream = new \PLHask\Http\Stream(fopen('php://temp', 'r+'));
+    $stream = new \PHLask\Http\Stream(fopen('php://temp', 'r+'));
     $stream->write($compressed);
     
     // ایجاد پاسخ جدید با بدنه فشرده‌شده و هدرهای مناسب

@@ -837,10 +837,10 @@ session_regenerate_id(true);
 
 require_once 'vendor/autoload.php';
 
-use PLHask\App;
-use PLHask\Http\Request;
-use PLHask\Http\Response;
-use PLHask\Database\Connection;
+use PHLask\App;
+use PHLask\Http\Request;
+use PHLask\Http\Response;
+use PHLask\Database\Connection;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 

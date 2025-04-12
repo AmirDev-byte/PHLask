@@ -194,7 +194,7 @@ class FileCache
     private static function getCacheFile(string $key): string
     {
         if (empty(self::$cachePath)) {
-            self::setCachePath(sys_get_temp_dir() . '/PLHask_cache');
+            self::setCachePath(sys_get_temp_dir() . '/PHLask_cache');
         }
         
         // تبدیل کلید به نام فایل امن
@@ -368,7 +368,7 @@ class RedisCache
     /**
      * @var string پیشوند کلیدهای کش
      */
-    private static string $prefix = 'PLHask:';
+    private static string $prefix = 'PHLask:';
     
     /**
      * اتصال به Redis

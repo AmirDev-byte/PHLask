@@ -34,7 +34,7 @@
 در روش دستی، شما به صورت صریح تراکنش را شروع، تأیید یا برگشت می‌دهید:
 
 ```php
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 
 $connection = Connection::connection();
 
@@ -62,7 +62,7 @@ $connection->insert('order_items', [
 // بروزرسانی موجودی محصول
 $connection->update(
 'products',
-['stock' => new \PLHask\Database\Raw('stock - ' . $item['quantity'])],
+['stock' => new \PHLask\Database\Raw('stock - ' . $item['quantity'])],
 'id = :id',
 [':id' => $item['product_id']]
 );
@@ -95,7 +95,7 @@ throw $e;
 برگشت می‌دهد:
 
 ```php
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 
 $connection = Connection::connection();
 
@@ -121,7 +121,7 @@ $conn->insert('order_items', [
 // بروزرسانی موجودی محصول
 $conn->update(
 'products',
-['stock' => new \PLHask\Database\Raw('stock - ' . $item['quantity'])],
+['stock' => new \PHLask\Database\Raw('stock - ' . $item['quantity'])],
 'id = :id',
 [':id' => $item['product_id']]
 );
@@ -152,7 +152,7 @@ throw $e;
 هنگام کار با مدل‌ها، می‌توانید از تراکنش‌ها برای اطمینان از انسجام داده‌ها استفاده کنید:
 
 ```php
-use PLHask\Database\Connection;
+use PHLask\Database\Connection;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -467,7 +467,7 @@ $conn->insert('order_items', [
 // کاهش موجودی محصول
 $conn->update(
 'products',
-['stock' => new \PLHask\Database\Raw('stock - :quantity')],
+['stock' => new \PHLask\Database\Raw('stock - :quantity')],
 'id = :id',
 [
 ':id' => $item['product_id'],
@@ -512,7 +512,7 @@ $items = $conn->fetchAll(
 foreach ($items as $item) {
 $conn->update(
 'products',
-['stock' => new \PLHask\Database\Raw('stock + :quantity')],
+['stock' => new \PHLask\Database\Raw('stock + :quantity')],
 'id = :id',
 [
 ':id' => $item['product_id'],

@@ -13,14 +13,14 @@
 
 ## ایجاد یک مدل
 
-برای ایجاد یک مدل، کلاس خود را از کلاس `PLHask\Database\Model` ارث‌بری کنید:
+برای ایجاد یک مدل، کلاس خود را از کلاس `PHLask\Database\Model` ارث‌بری کنید:
 
 ```php
 <?php
 
 namespace App\Models;
 
-use PLHask\Database\Model;
+use PHLask\Database\Model;
 
 class User extends Model
 {
