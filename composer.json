@@ -3,7 +3,7 @@
   "description": "A minimal and elegant microframework for building APIs in PHP — inspired by Flask, designed for simplicity and speed.",
   "type": "library",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "authors": [
     {
       "name": "Amir",
