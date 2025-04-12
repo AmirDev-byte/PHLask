@@ -21,7 +21,7 @@
   },
   "autoload": {
     "psr-4": {
-      "PLHask\\": "src/"
+      "PHLask\\": "src/"
     }
   },
   "require-dev": {
