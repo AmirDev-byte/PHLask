@@ -12,7 +12,7 @@ use Psr\Http\Message\UriInterface;
 class Uri implements UriInterface
 {
     /**
-     * @var array پورت‌های پیش‌فرض برای طرح‌های مختلف
+     * @var array<string, int> پورت‌های پیش‌فرض برای طرح‌های مختلف
      */
     private const DEFAULT_PORTS = [
         'http' => 80,
@@ -20,34 +20,42 @@ class Uri implements UriInterface
         'ftp' => 21,
         'sftp' => 22,
     ];
+
     /**
      * @var string طرح (scheme) آدرس
      */
     private string $scheme = '';
+
     /**
      * @var string نام کاربری
      */
     private string $user = '';
+
     /**
      * @var string|null رمز عبور
      */
     private ?string $password = null;
+
     /**
      * @var string میزبان
      */
     private string $host = '';
+
     /**
      * @var int|null پورت
      */
     private ?int $port = null;
+
     /**
      * @var string مسیر
      */
     private string $path = '';
+
     /**
      * @var string پارامترهای کوئری
      */
     private string $query = '';
+
     /**
      * @var string قطعه (fragment)
      */
@@ -80,10 +88,8 @@ class Uri implements UriInterface
 
     /**
      * ایجاد Uri از متغیرهای سراسری PHP
-     *
-     * @return Uri
      */
-    public static function fromGlobals(): Uri
+    public static function fromGlobals(): self
     {
         $uri = new self();
 
@@ -170,11 +176,11 @@ class Uri implements UriInterface
      */
     public function withQuery($query): self
     {
-        if (is_string($query) && strpos($query, '?') === 0) {
+        if (is_string($query) && str_starts_with($query, '?')) {
             $query = substr($query, 1);
         }
 
-        if (strpos($query, '#') !== false) {
+        if (str_contains($query, '#')) {
             throw new \InvalidArgumentException('Query cannot contain a fragment');
         }
 
@@ -192,11 +198,11 @@ class Uri implements UriInterface
      */
     public function withPath($path): self
     {
-        if (strpos($path, '?') !== false) {
+        if (str_contains($path, '?')) {
             throw new \InvalidArgumentException('Path cannot contain a query string');
         }
 
-        if (strpos($path, '#') !== false) {
+        if (str_contains($path, '#')) {
             throw new \InvalidArgumentException('Path cannot contain a fragment');
         }
 
@@ -205,7 +211,7 @@ class Uri implements UriInterface
         }
 
         // اطمینان از وجود / در ابتدای مسیر
-        if (!empty($path) && $path[0] !== '/') {
+        if (!empty($path) && !str_starts_with($path, '/')) {
             $path = '/' . $path;
         }
 
@@ -257,8 +263,6 @@ class Uri implements UriInterface
 
     /**
      * بررسی می‌کند که آیا پورت فعلی، پورت پیش‌فرض برای طرح فعلی است یا خیر
-     *
-     * @return bool
      */
     private function isDefaultPort(): bool
     {
@@ -317,7 +321,7 @@ class Uri implements UriInterface
      */
     public function withFragment($fragment): self
     {
-        if (is_string($fragment) && strpos($fragment, '#') === 0) {
+        if (is_string($fragment) && str_starts_with($fragment, '#')) {
             $fragment = substr($fragment, 1);
         }
 

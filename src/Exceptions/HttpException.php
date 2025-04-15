@@ -15,7 +15,7 @@ class HttpException extends \Exception
     private int $statusCode;
 
     /**
-     * @var array|null اطلاعات اضافی خطا
+     * @var array<string, mixed>|null اطلاعات اضافی خطا
      */
     private ?array $details;
 
@@ -24,7 +24,7 @@ class HttpException extends \Exception
      *
      * @param int $statusCode کد وضعیت HTTP
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      * @param \Throwable|null $previous خطای قبلی
      */
     public function __construct(
@@ -44,8 +44,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 400 Bad Request
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function badRequest(string $message = 'Bad Request', ?array $details = null): self
     {
@@ -56,8 +55,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 401 Unauthorized
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function unauthorized(string $message = 'Unauthorized', ?array $details = null): self
     {
@@ -68,8 +66,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 403 Forbidden
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function forbidden(string $message = 'Forbidden', ?array $details = null): self
     {
@@ -80,8 +77,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 404 Not Found
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function notFound(string $message = 'Not Found', ?array $details = null): self
     {
@@ -92,8 +88,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 405 Method Not Allowed
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function methodNotAllowed(string $message = 'Method Not Allowed', ?array $details = null): self
     {
@@ -104,8 +99,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 422 Unprocessable Entity
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function unprocessableEntity(string $message = 'Unprocessable Entity', ?array $details = null): self
     {
@@ -116,8 +110,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 429 Too Many Requests
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function tooManyRequests(string $message = 'Too Many Requests', ?array $details = null): self
     {
@@ -128,8 +121,7 @@ class HttpException extends \Exception
      * ایجاد استثنا برای خطای 500 Internal Server Error
      *
      * @param string $message پیام خطا
-     * @param array|null $details اطلاعات اضافی
-     * @return self
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      */
     public static function internalServerError(string $message = 'Internal Server Error', ?array $details = null): self
     {
@@ -138,8 +130,6 @@ class HttpException extends \Exception
 
     /**
      * دریافت کد وضعیت HTTP
-     *
-     * @return int
      */
     public function getStatusCode(): int
     {
@@ -149,7 +139,7 @@ class HttpException extends \Exception
     /**
      * دریافت اطلاعات اضافی خطا
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function getDetails(): ?array
     {

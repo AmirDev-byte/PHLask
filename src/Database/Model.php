@@ -33,18 +33,22 @@ abstract class Model
      * @var string نام ستون زمان به‌روزرسانی
      */
     protected static string $updatedAt = 'updated_at';
+
     /**
      * @var Connection|null اتصال پایگاه داده
      */
     protected static ?Connection $connection = null;
+
     /**
-     * @var array مقادیر ویژگی‌های مدل
+     * @var array<string, mixed> مقادیر ویژگی‌های مدل
      */
     protected array $attributes = [];
+
     /**
-     * @var array مقادیر اصلی (قبل از تغییر)
+     * @var array<string, mixed> مقادیر اصلی (قبل از تغییر)
      */
     protected array $original = [];
+
     /**
      * @var bool آیا مدل جدید است
      */
@@ -53,7 +57,7 @@ abstract class Model
     /**
      * سازنده کلاس Model
      *
-     * @param array $attributes ویژگی‌های اولیه
+     * @param array<string, mixed> $attributes ویژگی‌های اولیه
      * @param bool $exists آیا مدل در پایگاه داده وجود دارد
      */
     public function __construct(array $attributes = [], bool $exists = false)
@@ -69,8 +73,7 @@ abstract class Model
     /**
      * تنظیم مقادیر ویژگی‌ها
      *
-     * @param array $attributes مقادیر ویژگی‌ها
-     * @return self
+     * @param array<string, mixed> $attributes مقادیر ویژگی‌ها
      */
     public function fill(array $attributes): self
     {
@@ -86,9 +89,8 @@ abstract class Model
      *
      * @param string $key نام ویژگی
      * @param mixed $value مقدار ویژگی
-     * @return self
      */
-    public function setAttribute(string $key, $value): self
+    public function setAttribute(string $key, mixed $value): self
     {
         $this->attributes[$key] = $value;
         return $this;
@@ -97,7 +99,7 @@ abstract class Model
     /**
      * دریافت همه رکوردها
      *
-     * @return array
+     * @return array<int, static>
      */
     public static function all(): array
     {
@@ -108,8 +110,6 @@ abstract class Model
 
     /**
      * شروع کوئری بیلدر برای این مدل
-     *
-     * @return QueryBuilder
      */
     public static function query(): QueryBuilder
     {
@@ -117,10 +117,51 @@ abstract class Model
     }
 
     /**
+     * دریافت نام جدول
+     */
+    public static function getTable(): string
+    {
+        if (isset(static::$table)) {
+            return static::$table;
+        }
+
+        // استخراج نام جدول از نام کلاس
+        $className = (new \ReflectionClass(static::class))->getShortName();
+
+        // تبدیل StudlyCase به snake_case و جمع بستن
+        $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $className));
+
+        // جمع بستن ساده (افزودن 's' به انتها)
+        return $table . 's';
+    }
+
+    /**
+     * دریافت اتصال پایگاه داده
+     */
+    public static function getConnection(): Connection
+    {
+        if (static::$connection === null) {
+            static::$connection = Connection::connection();
+        }
+
+        return static::$connection;
+    }
+
+    /**
+     * تنظیم اتصال پایگاه داده
+     *
+     * @param Connection $connection اتصال
+     */
+    public static function setConnection(Connection $connection): void
+    {
+        static::$connection = $connection;
+    }
+
+    /**
      * تبدیل رکوردهای دیتابیس به مدل‌ها
      *
-     * @param array $records رکوردها
-     * @return array
+     * @param array<int, array<string, mixed>> $records رکوردها
+     * @return array<int, static>
      */
     protected static function hydrate(array $records): array
     {
@@ -137,9 +178,8 @@ abstract class Model
      * یافتن یک رکورد با کلید اصلی
      *
      * @param mixed $id مقدار کلید اصلی
-     * @return static|null
      */
-    public static function find($id): ?self
+    public static function find(mixed $id): ?self
     {
         $record = static::query()->where(static::$primaryKey, $id)->first();
 
@@ -156,9 +196,8 @@ abstract class Model
      * @param string $column نام ستون
      * @param mixed $operator عملگر یا مقدار
      * @param mixed $value مقدار (اختیاری)
-     * @return static|null
      */
-    public static function findWhere(string $column, $operator, $value = null): ?self
+    public static function findWhere(string $column, mixed $operator, mixed $value = null): ?self
     {
         $query = static::query();
 
@@ -182,9 +221,9 @@ abstract class Model
      * @param string $column نام ستون
      * @param mixed $operator عملگر یا مقدار
      * @param mixed $value مقدار (اختیاری)
-     * @return array
+     * @return array<int, static>
      */
-    public static function findAllWhere(string $column, $operator, $value = null): array
+    public static function findAllWhere(string $column, mixed $operator, mixed $value = null): array
     {
         $query = static::query();
 
@@ -201,8 +240,7 @@ abstract class Model
     /**
      * ایجاد یک مدل جدید و ذخیره آن
      *
-     * @param array $attributes ویژگی‌ها
-     * @return static
+     * @param array<string, mixed> $attributes ویژگی‌ها
      */
     public static function create(array $attributes): self
     {
@@ -214,8 +252,6 @@ abstract class Model
 
     /**
      * ذخیره مدل در پایگاه داده
-     *
-     * @return bool
      */
     public function save(): bool
     {
@@ -228,8 +264,6 @@ abstract class Model
 
     /**
      * به‌روزرسانی مدل در پایگاه داده
-     *
-     * @return bool
      */
     protected function update(): bool
     {
@@ -264,7 +298,7 @@ abstract class Model
     /**
      * دریافت مقادیر تغییر یافته
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getDirty(): array
     {
@@ -280,9 +314,18 @@ abstract class Model
     }
 
     /**
-     * درج مدل در پایگاه داده
+     * دریافت یک ویژگی
      *
-     * @return bool
+     * @param string $key نام ویژگی
+     * @return mixed
+     */
+    public function getAttribute(string $key): mixed
+    {
+        return $this->attributes[$key] ?? null;
+    }
+
+    /**
+     * درج مدل در پایگاه داده
      */
     protected function insert(): bool
     {
@@ -311,10 +354,9 @@ abstract class Model
     /**
      * بررسی تغییر یک ویژگی
      *
-     * @param string $key نام ویژگی
-     * @return bool
+     * @param string|null $key نام ویژگی
      */
-    public function isDirty(string $key = null): bool
+    public function isDirty(?string $key = null): bool
     {
         if ($key === null) {
             return $this->attributes != $this->original;
@@ -329,8 +371,6 @@ abstract class Model
 
     /**
      * حذف مدل از پایگاه داده
-     *
-     * @return bool
      */
     public function delete(): bool
     {
@@ -353,66 +393,9 @@ abstract class Model
     }
 
     /**
-     * دریافت اتصال پایگاه داده
-     *
-     * @return Connection
-     */
-    public static function getConnection(): Connection
-    {
-        if (static::$connection === null) {
-            static::$connection = Connection::connection();
-        }
-
-        return static::$connection;
-    }
-
-    /**
-     * تنظیم اتصال پایگاه داده
-     *
-     * @param Connection $connection اتصال
-     * @return void
-     */
-    public static function setConnection(Connection $connection): void
-    {
-        static::$connection = $connection;
-    }
-
-    /**
-     * دریافت نام جدول
-     *
-     * @return string
-     */
-    public static function getTable(): string
-    {
-        if (isset(static::$table)) {
-            return static::$table;
-        }
-
-        // استخراج نام جدول از نام کلاس
-        $className = (new \ReflectionClass(static::class))->getShortName();
-
-        // تبدیل StudlyCase به snake_case و جمع بستن
-        $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $className));
-
-        // جمع بستن ساده (افزودن 's' به انتها)
-        return $table . 's';
-    }
-
-    /**
-     * دریافت یک ویژگی
-     *
-     * @param string $key نام ویژگی
-     * @return mixed
-     */
-    public function getAttribute(string $key)
-    {
-        return $this->attributes[$key] ?? null;
-    }
-
-    /**
      * تبدیل مدل به آرایه
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function toArray(): array
     {
@@ -425,7 +408,7 @@ abstract class Model
      * @param string $key نام ویژگی
      * @return mixed
      */
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->getAttribute($key);
     }
@@ -436,7 +419,7 @@ abstract class Model
      * @param string $key نام ویژگی
      * @param mixed $value مقدار ویژگی
      */
-    public function __set(string $key, $value)
+    public function __set(string $key, mixed $value): void
     {
         $this->setAttribute($key, $value);
     }
@@ -445,9 +428,8 @@ abstract class Model
      * بررسی وجود ویژگی
      *
      * @param string $key نام ویژگی
-     * @return bool
      */
-    public function __isset(string $key)
+    public function __isset(string $key): bool
     {
         return isset($this->attributes[$key]);
     }
@@ -457,7 +439,7 @@ abstract class Model
      *
      * @param string $key نام ویژگی
      */
-    public function __unset(string $key)
+    public function __unset(string $key): void
     {
         unset($this->attributes[$key]);
     }

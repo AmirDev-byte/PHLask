@@ -13,33 +13,34 @@ use PHLask\Http\Response;
 $app = new App();
 
 // مسیر ساده
-$app->get('/', function (Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response): Response {
     return $response->text('Hello World!');
 });
 
 // مسیر با پارامتر
-$app->get('/hello/{name}', function (Request $request, Response $response) {
+$app->get('/hello/{name}', function (Request $request, Response $response): Response {
     $name = $request->param('name', 'Guest');
     return $response->text("Hello, {$name}!");
 });
 
 // برگرداندن JSON
-$app->get('/api/info', function (Request $request, Response $response) {
+$app->get('/api/info', function (Request $request, Response $response): Response {
     return $response->json([
         'name' => 'PHLask',
-        'version' => '1.0.0',
+        'version' => '2.0.0',
         'author' => 'Your Name',
         'features' => [
             'Simple routing',
             'Optional middleware',
             'Optional database',
             'PSR-7 compatible'
-        ]
+        ],
+        'php_version' => PHP_VERSION
     ]);
 });
 
 // میان‌افزار ساده
-$app->middleware(function (Request $request, callable $next) {
+$app->middleware(function (Request $request, callable $next): Response {
     // قبل از اجرای درخواست
     $startTime = microtime(true);
 

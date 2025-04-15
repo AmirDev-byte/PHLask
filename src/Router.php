@@ -10,7 +10,7 @@ namespace PHLask;
 class Router
 {
     /**
-     * @var array لیست مسیرهای تعریف شده
+     * @var array<array{method: string, path: string, pattern: string, handler: callable}> لیست مسیرهای تعریف شده
      */
     private array $routes = [];
 
@@ -20,12 +20,11 @@ class Router
      * @param string $method متد HTTP
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return void
      */
     public function addRoute(string $method, string $path, callable $handler): void
     {
         // اطمینان از وجود مسیر با / در ابتدا
-        if ($path !== '/' && $path[0] !== '/') {
+        if ($path !== '/' && !str_starts_with($path, '/')) {
             $path = '/' . $path;
         }
 
@@ -61,18 +60,18 @@ class Router
      *
      * @param string $method متد HTTP
      * @param string $path مسیر درخواستی
-     * @return array|null اطلاعات مسیر تطبیق شده یا null در صورت عدم تطابق
+     * @return array{0: callable, 1: array<string, string>}|null اطلاعات مسیر تطبیق شده یا null در صورت عدم تطابق
      */
     public function match(string $method, string $path): ?array
     {
         // اطمینان از وجود / در ابتدای مسیر
-        if ($path !== '/' && $path[0] !== '/') {
+        if ($path !== '/' && !str_starts_with($path, '/')) {
             $path = '/' . $path;
         }
 
         // حذف / اضافی از انتهای مسیر
         $path = rtrim($path, '/');
-        if (empty($path)) {
+        if ($path === '') {
             $path = '/';
         }
 
@@ -85,9 +84,7 @@ class Router
             // بررسی تطابق مسیر
             if (preg_match($route['pattern'], $path, $matches)) {
                 // حذف کلیدهای عددی از نتیجه تطبیق
-                $params = array_filter($matches, function ($key) {
-                    return !is_numeric($key);
-                }, ARRAY_FILTER_USE_KEY);
+                $params = array_filter($matches, fn($key) => !is_numeric($key), ARRAY_FILTER_USE_KEY);
 
                 return [$route['handler'], $params];
             }
@@ -99,7 +96,7 @@ class Router
     /**
      * دریافت لیست تمام مسیرهای ثبت شده
      *
-     * @return array
+     * @return array<array{method: string, path: string, pattern: string, handler: callable}>
      */
     public function getRoutes(): array
     {

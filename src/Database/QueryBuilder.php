@@ -20,32 +20,53 @@ class QueryBuilder
     private string $table;
 
     /**
-     * @var array ستون‌های انتخابی
+     * @var array<string|int, mixed> ستون‌های انتخابی
      */
     private array $selects = [];
 
     /**
-     * @var array شرط‌های where
+     * @var array<int, array{
+     *    type: string,
+     *    column: string,
+     *    operator?: string,
+     *    value?: mixed,
+     *    boolean: string,
+     *    param?: string,
+     *    not?: bool,
+     *    params?: array<string>,
+     *    values?: array<mixed>,
+     *    min_param?: string,
+     *    max_param?: string
+     * }> شرط‌های where
      */
     private array $wheres = [];
 
     /**
-     * @var array پارامترهای پرس‌وجو
+     * @var array<string, mixed> پارامترهای پرس‌وجو
      */
     private array $params = [];
 
     /**
-     * @var array|null دستورات join
+     * @var array<int, array{
+     *     table: string,
+     *     first: string,
+     *     operator: string,
+     *     second: string,
+     *     type: string
+     * }>|null دستورات join
      */
     private ?array $joins = null;
 
     /**
-     * @var array|null دستورات order by
+     * @var array<int, array{
+     *     column: string,
+     *     direction: string
+     * }>|null دستورات order by
      */
     private ?array $orders = null;
 
     /**
-     * @var array|null دستورات group by
+     * @var array<int, string>|null دستورات group by
      */
     private ?array $groups = null;
 
@@ -80,11 +101,10 @@ class QueryBuilder
      * افزودن شرط where با رابطه منطقی OR
      *
      * @param string $column نام ستون
-     * @param string|null $operator عملگر
+     * @param string|mixed|null $operator عملگر
      * @param mixed $value مقدار
-     * @return self
      */
-    public function orWhere(string $column, $operator = null, $value = null): self
+    public function orWhere(string $column, mixed $operator = null, mixed $value = null): self
     {
         return $this->where($column, $operator, $value, 'OR');
     }
@@ -93,12 +113,11 @@ class QueryBuilder
      * افزودن شرط where
      *
      * @param string $column نام ستون
-     * @param string|null $operator عملگر
+     * @param string|mixed|null $operator عملگر
      * @param mixed $value مقدار
      * @param string $boolean رابطه منطقی (AND/OR)
-     * @return self
      */
-    public function where(string $column, $operator = null, $value = null, string $boolean = 'AND'): self
+    public function where(string $column, mixed $operator = null, mixed $value = null, string $boolean = 'AND'): self
     {
         // اگر فقط دو پارامتر ارسال شده باشد، عملگر را به '=' تنظیم می‌کنیم
         if ($value === null && $operator !== null) {
@@ -128,7 +147,6 @@ class QueryBuilder
      *
      * @param string $column نام ستون
      * @param string $value مقدار
-     * @return self
      */
     public function orWhereLike(string $column, string $value): self
     {
@@ -141,7 +159,6 @@ class QueryBuilder
      * @param string $column نام ستون
      * @param string $value مقدار
      * @param string $boolean رابطه منطقی (AND/OR)
-     * @return self
      */
     public function whereLike(string $column, string $value, string $boolean = 'AND'): self
     {
@@ -153,7 +170,6 @@ class QueryBuilder
      *
      * @param string $column نام ستون
      * @param string $boolean رابطه منطقی (AND/OR)
-     * @return self
      */
     public function whereNotNull(string $column, string $boolean = 'AND'): self
     {
@@ -166,7 +182,6 @@ class QueryBuilder
      * @param string $column نام ستون
      * @param string $boolean رابطه منطقی (AND/OR)
      * @param bool $not آیا شرط معکوس شود (IS NOT NULL)
-     * @return self
      */
     public function whereNull(string $column, string $boolean = 'AND', bool $not = false): self
     {
@@ -184,9 +199,8 @@ class QueryBuilder
      * افزودن شرط where برای مقادیر خارج از یک مجموعه (NOT IN)
      *
      * @param string $column نام ستون
-     * @param array $values مقادیر
+     * @param array<mixed> $values مقادیر
      * @param string $boolean رابطه منطقی (AND/OR)
-     * @return self
      */
     public function whereNotIn(string $column, array $values, string $boolean = 'AND'): self
     {
@@ -197,10 +211,9 @@ class QueryBuilder
      * افزودن شرط where برای مقادیر درون یک مجموعه (IN)
      *
      * @param string $column نام ستون
-     * @param array $values مقادیر
+     * @param array<mixed> $values مقادیر
      * @param string $boolean رابطه منطقی (AND/OR)
      * @param bool $not آیا شرط معکوس شود (NOT IN)
-     * @return self
      */
     public function whereIn(string $column, array $values, string $boolean = 'AND', bool $not = false): self
     {
@@ -228,9 +241,8 @@ class QueryBuilder
      * افزودن شرط where برای مقادیر خارج از یک محدوده (NOT BETWEEN)
      *
      * @param string $column نام ستون
-     * @param array $values مقادیر [min, max]
+     * @param array<int, mixed> $values مقادیر [min, max]
      * @param string $boolean رابطه منطقی (AND/OR)
-     * @return self
      */
     public function whereNotBetween(string $column, array $values, string $boolean = 'AND'): self
     {
@@ -241,10 +253,9 @@ class QueryBuilder
      * افزودن شرط where برای مقادیر بین یک محدوده (BETWEEN)
      *
      * @param string $column نام ستون
-     * @param array $values مقادیر [min, max]
+     * @param array<int, mixed> $values مقادیر [min, max]
      * @param string $boolean رابطه منطقی (AND/OR)
      * @param bool $not آیا شرط معکوس شود (NOT BETWEEN)
-     * @return self
      */
     public function whereBetween(string $column, array $values, string $boolean = 'AND', bool $not = false): self
     {
@@ -278,7 +289,6 @@ class QueryBuilder
      * @param string $first ستون اول
      * @param string $operator عملگر
      * @param string $second ستون دوم
-     * @return self
      */
     public function leftJoin(string $table, string $first, string $operator, string $second): self
     {
@@ -293,10 +303,11 @@ class QueryBuilder
      * @param string $operator عملگر
      * @param string $second ستون دوم
      * @param string $type نوع JOIN
-     * @return self
      */
     public function join(string $table, string $first, string $operator, string $second, string $type = 'INNER'): self
     {
+        $this->joins ??= [];
+
         $this->joins[] = [
             'table' => $table,
             'first' => $first,
@@ -315,7 +326,6 @@ class QueryBuilder
      * @param string $first ستون اول
      * @param string $operator عملگر
      * @param string $second ستون دوم
-     * @return self
      */
     public function rightJoin(string $table, string $first, string $operator, string $second): self
     {
@@ -326,7 +336,6 @@ class QueryBuilder
      * افزودن دستور ORDER BY با جهت نزولی
      *
      * @param string $column نام ستون
-     * @return self
      */
     public function orderByDesc(string $column): self
     {
@@ -338,15 +347,16 @@ class QueryBuilder
      *
      * @param string $column نام ستون
      * @param string $direction جهت مرتب‌سازی
-     * @return self
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
         $direction = strtoupper($direction);
 
-        if (!in_array($direction, ['ASC', 'DESC'])) {
+        if (!in_array($direction, ['ASC', 'DESC'], true)) {
             throw new \InvalidArgumentException('Order direction must be ASC or DESC');
         }
+
+        $this->orders ??= [];
 
         $this->orders[] = [
             'column' => $column,
@@ -359,10 +369,9 @@ class QueryBuilder
     /**
      * افزودن دستور GROUP BY
      *
-     * @param string|array $columns ستون‌ها
-     * @return self
+     * @param string|array<int, string> $columns ستون‌ها
      */
-    public function groupBy($columns): self
+    public function groupBy(string|array $columns): self
     {
         $this->groups = is_array($columns) ? $columns : func_get_args();
         return $this;
@@ -374,9 +383,8 @@ class QueryBuilder
      * @param string $column نام ستون
      * @param string $operator عملگر
      * @param mixed $value مقدار
-     * @return self
      */
-    public function having(string $column, string $operator, $value): self
+    public function having(string $column, string $operator, mixed $value): self
     {
         $param = ':having_' . $column;
         $this->having = $column . ' ' . $operator . ' ' . $param;
@@ -390,7 +398,6 @@ class QueryBuilder
      *
      * @param int $page شماره صفحه
      * @param int $perPage تعداد رکورد در هر صفحه
-     * @return self
      */
     public function paginate(int $page, int $perPage = 15): self
     {
@@ -405,7 +412,6 @@ class QueryBuilder
      * افزودن دستور LIMIT
      *
      * @param int $limit تعداد رکوردها
-     * @return self
      */
     public function limit(int $limit): self
     {
@@ -417,7 +423,6 @@ class QueryBuilder
      * افزودن دستور OFFSET
      *
      * @param int $offset جابجایی رکوردها
-     * @return self
      */
     public function offset(int $offset): self
     {
@@ -428,7 +433,7 @@ class QueryBuilder
     /**
      * درج داده در جدول
      *
-     * @param array $data داده‌های برای درج
+     * @param array<string, mixed> $data داده‌های برای درج
      * @return int آیدی آخرین رکورد درج شده
      */
     public function insert(array $data): int
@@ -439,7 +444,7 @@ class QueryBuilder
     /**
      * به‌روزرسانی داده‌ها
      *
-     * @param array $data داده‌های برای به‌روزرسانی
+     * @param array<string, mixed> $data داده‌های برای به‌روزرسانی
      * @return int تعداد رکوردهای تغییر یافته
      */
     public function update(array $data): int
@@ -456,8 +461,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش WHERE کوئری
-     *
-     * @return string
      */
     protected function buildWheres(): string
     {
@@ -470,24 +473,13 @@ class QueryBuilder
         foreach ($this->wheres as $i => $where) {
             $boolean = $i === 0 ? '' : $where['boolean'] . ' ';
 
-            switch ($where['type']) {
-                case 'basic':
-                    $sql[] = $boolean . $where['column'] . ' ' . $where['operator'] . ' ' . $where['param'];
-                    break;
-
-                case 'null':
-                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' IS NOT NULL' : ' IS NULL');
-                    break;
-
-                case 'in':
-                    $placeholders = implode(', ', $where['params']);
-                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' NOT IN ' : ' IN ') . '(' . $placeholders . ')';
-                    break;
-
-                case 'between':
-                    $sql[] = $boolean . $where['column'] . ($where['not'] ? ' NOT BETWEEN ' : ' BETWEEN ') . $where['min_param'] . ' AND ' . $where['max_param'];
-                    break;
-            }
+            $sql[] = match ($where['type']) {
+                'basic' => $boolean . $where['column'] . ' ' . $where['operator'] . ' ' . $where['param'],
+                'null' => $boolean . $where['column'] . ($where['not'] ? ' IS NOT NULL' : ' IS NULL'),
+                'in' => $boolean . $where['column'] . ($where['not'] ? ' NOT IN ' : ' IN ') . '(' . implode(', ', $where['params']) . ')',
+                'between' => $boolean . $where['column'] . ($where['not'] ? ' NOT BETWEEN ' : ' BETWEEN ') . $where['min_param'] . ' AND ' . $where['max_param'],
+                default => throw new \RuntimeException('Unknown where type: ' . $where['type'])
+            };
         }
 
         return 'WHERE ' . implode(' ', $sql);
@@ -512,8 +504,6 @@ class QueryBuilder
 
     /**
      * بررسی وجود حداقل یک رکورد
-     *
-     * @return bool
      */
     public function exists(): bool
     {
@@ -524,7 +514,6 @@ class QueryBuilder
      * اجرای کوئری و دریافت تعداد نتایج
      *
      * @param string $column نام ستون (پیش‌فرض: *)
-     * @return int
      */
     public function count(string $column = '*'): int
     {
@@ -540,7 +529,7 @@ class QueryBuilder
     /**
      * اجرای کوئری و دریافت اولین نتیجه
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function first(): ?array
     {
@@ -550,8 +539,6 @@ class QueryBuilder
 
     /**
      * ساخت کوئری SQL کامل
-     *
-     * @return string
      */
     public function toSql(): string
     {
@@ -571,8 +558,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش SELECT کوئری
-     *
-     * @return string
      */
     protected function buildSelect(): string
     {
@@ -585,8 +570,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش FROM کوئری
-     *
-     * @return string
      */
     protected function buildFrom(): string
     {
@@ -595,8 +578,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش JOIN کوئری
-     *
-     * @return string
      */
     protected function buildJoins(): string
     {
@@ -615,8 +596,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش GROUP BY کوئری
-     *
-     * @return string
      */
     protected function buildGroups(): string
     {
@@ -629,8 +608,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش HAVING کوئری
-     *
-     * @return string
      */
     protected function buildHaving(): string
     {
@@ -643,8 +620,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش ORDER BY کوئری
-     *
-     * @return string
      */
     protected function buildOrders(): string
     {
@@ -663,8 +638,6 @@ class QueryBuilder
 
     /**
      * ساخت بخش LIMIT و OFFSET کوئری
-     *
-     * @return string
      */
     protected function buildLimitOffset(): string
     {
@@ -687,7 +660,7 @@ class QueryBuilder
      * @param string $column نام ستون
      * @return mixed|null
      */
-    public function value(string $column)
+    public function value(string $column): mixed
     {
         $result = $this->select($column)->first();
 
@@ -701,10 +674,9 @@ class QueryBuilder
     /**
      * انتخاب ستون‌ها
      *
-     * @param string|array $columns ستون‌های مورد نظر
-     * @return self
+     * @param string|array<int, string> $columns ستون‌های مورد نظر
      */
-    public function select($columns = ['*']): self
+    public function select(string|array $columns = ['*']): self
     {
         $this->selects = is_array($columns) ? $columns : func_get_args();
         return $this;
@@ -714,21 +686,19 @@ class QueryBuilder
      * دریافت یک ستون به صورت آرایه
      *
      * @param string $column نام ستون
-     * @return array
+     * @return array<int, mixed>
      */
     public function pluck(string $column): array
     {
         $results = $this->select($column)->get();
 
-        return array_map(function ($row) use ($column) {
-            return $row[$column] ?? null;
-        }, $results);
+        return array_map(fn($row) => $row[$column] ?? null, $results);
     }
 
     /**
      * اجرای کوئری و دریافت همه نتایج
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function get(): array
     {
@@ -738,8 +708,6 @@ class QueryBuilder
 
     /**
      * فعال‌سازی دیباگ (چاپ کوئری)
-     *
-     * @return string
      */
     public function debug(): string
     {
@@ -759,7 +727,7 @@ class QueryBuilder
     /**
      * دریافت پارامترهای کوئری
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getParams(): array
     {
@@ -770,8 +738,8 @@ class QueryBuilder
      * اجرای کوئری خام SQL
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترها
-     * @return array
+     * @param array<string, mixed> $params پارامترها
+     * @return array<int, array<string, mixed>>
      */
     public function raw(string $query, array $params = []): array
     {

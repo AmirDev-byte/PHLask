@@ -11,19 +11,19 @@ require_once __DIR__ . '/vendor/autoload.php';
 class SimpleFlask
 {
     /**
-     * @var \PDO اتصال پایگاه داده
+     * @var \PDO|null اتصال پایگاه داده
      */
-    private $db = null;
+    private ?\PDO $db = null;
 
     /**
-     * @var array مسیرهای تعریف شده
+     * @var array<string, array<string, callable>> مسیرهای تعریف شده
      */
-    private $routes = [];
+    private array $routes = [];
 
     /**
-     * @var array متغیرهای قالب
+     * @var array<string, mixed> متغیرهای قالب
      */
-    private $vars = [];
+    private array $vars = [];
 
     /**
      * سازنده کلاس
@@ -37,28 +37,25 @@ class SimpleFlask
      * اتصال به پایگاه داده
      *
      * @param string $type نوع پایگاه داده (sqlite یا mysql)
-     * @param array $config تنظیمات اتصال
-     * @return $this
+     * @param array<string, mixed> $config تنظیمات اتصال
      */
-    public function connectDB($type, $config = [])
+    public function connectDB(string $type, array $config = []): self
     {
-        if ($type === 'sqlite') {
-            $path = $config['path'] ?? ':memory:';
-            $this->db = new \PDO('sqlite:' . $path);
-        } else if ($type === 'mysql') {
-            $host = $config['host'] ?? 'localhost';
-            $dbname = $config['database'] ?? '';
-            $username = $config['username'] ?? 'root';
-            $password = $config['password'] ?? '';
-            $port = $config['port'] ?? 3306;
-
-            $this->db = new \PDO(
-                "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4",
-                $username,
-                $password,
+        $this->db = match ($type) {
+            'sqlite' => new \PDO('sqlite:' . ($config['path'] ?? ':memory:')),
+            'mysql' => new \PDO(
+                sprintf(
+                    "mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4",
+                    $config['host'] ?? 'localhost',
+                    $config['port'] ?? 3306,
+                    $config['database'] ?? '',
+                ),
+                $config['username'] ?? 'root',
+                $config['password'] ?? '',
                 [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-            );
-        }
+            ),
+            default => throw new \InvalidArgumentException("Unsupported database type: {$type}")
+        };
 
         return $this;
     }
@@ -68,9 +65,8 @@ class SimpleFlask
      *
      * @param string $path مسیر
      * @param callable $callback تابع پاسخگو
-     * @return $this
      */
-    public function get($path, $callback)
+    public function get(string $path, callable $callback): self
     {
         $this->routes['GET'][$path] = $callback;
         return $this;
@@ -81,9 +77,8 @@ class SimpleFlask
      *
      * @param string $path مسیر
      * @param callable $callback تابع پاسخگو
-     * @return $this
      */
-    public function post($path, $callback)
+    public function post(string $path, callable $callback): self
     {
         $this->routes['POST'][$path] = $callback;
         return $this;
@@ -96,7 +91,7 @@ class SimpleFlask
      * @param mixed $default مقدار پیش‌فرض
      * @return mixed
      */
-    public function input($name, $default = null)
+    public function input(string $name, mixed $default = null): mixed
     {
         return $_POST[$name] ?? $_GET[$name] ?? $default;
     }
@@ -106,9 +101,8 @@ class SimpleFlask
      *
      * @param string $name نام متغیر
      * @param mixed $value مقدار متغیر
-     * @return $this
      */
-    public function set($name, $value)
+    public function set(string $name, mixed $value): self
     {
         $this->vars[$name] = $value;
         return $this;
@@ -118,10 +112,9 @@ class SimpleFlask
      * نمایش قالب
      *
      * @param string $template آدرس فایل قالب
-     * @param array $data داده‌های اضافی
-     * @return string
+     * @param array<string, mixed> $data داده‌های اضافی
      */
-    public function view($template, $data = [])
+    public function view(string $template, array $data = []): string
     {
         // ترکیب داده‌های تنظیم شده با داده‌های ارسالی
         $data = array_merge($this->vars, $data);
@@ -136,16 +129,15 @@ class SimpleFlask
         include $template;
 
         // دریافت و پاکسازی بافر
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 
     /**
      * کار با جدول دیتابیس
      *
      * @param string $table نام جدول
-     * @return TableHelper
      */
-    public function table($table)
+    public function table(string $table): TableHelper
     {
         if ($this->db === null) {
             throw new \Exception('Database connection is not established. Call connectDB() first.');
@@ -158,10 +150,10 @@ class SimpleFlask
      * اجرای یک کوئری خام SQL
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترها
-     * @return array نتیجه کوئری
+     * @param array<string, mixed> $params پارامترها
+     * @return array<int, array<string, mixed>> نتیجه کوئری
      */
-    public function query($query, $params = [])
+    public function query(string $query, array $params = []): array
     {
         if ($this->db === null) {
             throw new \Exception('Database connection is not established. Call connectDB() first.');
@@ -174,31 +166,37 @@ class SimpleFlask
 
     /**
      * شروع یک تراکنش
-     *
-     * @return bool
      */
-    public function beginTransaction()
+    public function beginTransaction(): bool
     {
+        if ($this->db === null) {
+            throw new \Exception('Database connection is not established.');
+        }
+
         return $this->db->beginTransaction();
     }
 
     /**
      * تایید تراکنش
-     *
-     * @return bool
      */
-    public function commit()
+    public function commit(): bool
     {
+        if ($this->db === null) {
+            throw new \Exception('Database connection is not established.');
+        }
+
         return $this->db->commit();
     }
 
     /**
      * بازگشت تراکنش
-     *
-     * @return bool
      */
-    public function rollBack()
+    public function rollBack(): bool
     {
+        if ($this->db === null) {
+            throw new \Exception('Database connection is not established.');
+        }
+
         return $this->db->rollBack();
     }
 
@@ -206,8 +204,9 @@ class SimpleFlask
      * ایجاد هدایت (redirect)
      *
      * @param string $url آدرس مقصد
+     * @return never
      */
-    public function redirect($url)
+    public function redirect(string $url): never
     {
         header("Location: {$url}");
         exit;
@@ -217,21 +216,22 @@ class SimpleFlask
      * ارسال پاسخ JSON
      *
      * @param mixed $data داده‌های مورد نظر
+     * @return never
      */
-    public function json($data)
+    public function json(mixed $data): never
     {
         header('Content-Type: application/json');
-        echo json_encode($data);
+        echo json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     /**
      * اجرای برنامه
      */
-    public function run()
+    public function run(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
         // بررسی وجود مسیر
         if (isset($this->routes[$method][$path])) {
@@ -253,27 +253,32 @@ class TableHelper
     /**
      * @var string نام جدول
      */
-    private $table;
+    private string $table;
 
     /**
      * @var \PDO اتصال پایگاه داده
      */
-    private $db;
+    private \PDO $db;
 
     /**
-     * @var array شرط‌های where
+     * @var array<int, array{0: string, 1: mixed}> شرط‌های where
      */
-    private $wheres = [];
+    private array $wheres = [];
 
     /**
-     * @var array مرتب‌سازی
+     * @var array<string, mixed> پارامترهای شرط‌ها
      */
-    private $orders = [];
+    private array $params = [];
+
+    /**
+     * @var array<int, array{0: string, 1: string}>|null دستورات order by
+     */
+    private ?array $orders = null;
 
     /**
      * @var int|null محدود کردن نتایج
      */
-    private $limit = null;
+    private ?int $limit = null;
 
     /**
      * سازنده کلاس
@@ -281,7 +286,7 @@ class TableHelper
      * @param string $table نام جدول
      * @param \PDO $db اتصال پایگاه داده
      */
-    public function __construct($table, $db)
+    public function __construct(string $table, \PDO $db)
     {
         $this->table = $table;
         $this->db = $db;
@@ -292,10 +297,10 @@ class TableHelper
      *
      * @param string $column نام ستون
      * @param string $direction جهت مرتب‌سازی
-     * @return $this
      */
-    public function orderBy($column, $direction = 'ASC')
+    public function orderBy(string $column, string $direction = 'ASC'): self
     {
+        $this->orders ??= [];
         $this->orders[] = [$column, strtoupper($direction)];
         return $this;
     }
@@ -303,9 +308,9 @@ class TableHelper
     /**
      * دریافت همه رکوردها
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
-    public function all()
+    public function all(): array
     {
         return $this->get();
     }
@@ -313,25 +318,17 @@ class TableHelper
     /**
      * دریافت نتایج براساس شرایط
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
-    public function get()
+    public function get(): array
     {
         $sql = "SELECT * FROM {$this->table}";
-        $params = [];
+        [$conditions, $params] = $this->buildWhere();
 
-        // اضافه کردن شرط‌ها
-        if (!empty($this->wheres)) {
-            $conditions = [];
-            foreach ($this->wheres as $index => $where) {
-                $paramName = ":where_{$index}";
-                $conditions[] = "{$where[0]} = {$paramName}";
-                $params[$paramName] = $where[1];
-            }
+        if (!empty($conditions)) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
 
-        // اضافه کردن مرتب‌سازی
         if (!empty($this->orders)) {
             $orderClauses = [];
             foreach ($this->orders as $order) {
@@ -340,7 +337,6 @@ class TableHelper
             $sql .= " ORDER BY " . implode(', ', $orderClauses);
         }
 
-        // اضافه کردن محدودیت
         if ($this->limit !== null) {
             $sql .= " LIMIT {$this->limit}";
         }
@@ -348,19 +344,58 @@ class TableHelper
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
+        // بازنشانی بعد از اجرا
+        $this->reset();
+
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * ساخت بخش WHERE کوئری
+     *
+     * @return array{0: array<int, string>, 1: array<string, mixed>}
+     */
+    private function buildWhere(): array
+    {
+        if (empty($this->wheres)) {
+            return [[], []];
+        }
+
+        $conditions = [];
+        $params = [];
+
+        foreach ($this->wheres as $index => $where) {
+            $paramName = ":{$where[0]}_{$index}";
+            $conditions[] = "{$where[0]} = {$paramName}";
+            $params[$paramName] = $where[1];
+        }
+
+        return [$conditions, $params];
+    }
+
+    /**
+     * بازنشانی شرایط
+     */
+    private function reset(): void
+    {
+        $this->wheres = [];
+        $this->params = [];
+        $this->orders = null;
+        $this->limit = null;
     }
 
     /**
      * به‌روزرسانی رکوردها
      *
-     * @param array $data داده‌ها
-     * @return int
+     * @param array<string, mixed> $data داده‌ها
+     * @return int تعداد رکوردهای به‌روزرسانی شده
      */
-    public function update($data)
+    public function update(array $data): int
     {
-        if (empty($this->wheres)) {
-            throw new \Exception('Update requires at least one WHERE condition');
+        [$conditions, $whereParams] = $this->buildWhere();
+
+        if (empty($conditions)) {
+            throw new \RuntimeException('Update requires at least one WHERE condition');
         }
 
         $sets = [];
@@ -372,18 +407,14 @@ class TableHelper
             $params[$paramName] = $value;
         }
 
-        $conditions = [];
-        foreach ($this->wheres as $index => $where) {
-            $paramName = ":where_{$index}";
-            $conditions[] = "{$where[0]} = {$paramName}";
-            $params[$paramName] = $where[1];
-        }
-
         $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) .
             " WHERE " . implode(' AND ', $conditions);
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $stmt->execute([...$params, ...$whereParams]);
+
+        // بازنشانی بعد از اجرا
+        $this->reset();
 
         return $stmt->rowCount();
     }
@@ -391,21 +422,14 @@ class TableHelper
     /**
      * حذف رکوردها
      *
-     * @return int
+     * @return int تعداد رکوردهای حذف شده
      */
-    public function delete()
+    public function delete(): int
     {
-        if (empty($this->wheres)) {
-            throw new \Exception('Delete requires at least one WHERE condition');
-        }
+        [$conditions, $params] = $this->buildWhere();
 
-        $conditions = [];
-        $params = [];
-
-        foreach ($this->wheres as $index => $where) {
-            $paramName = ":where_{$index}";
-            $conditions[] = "{$where[0]} = {$paramName}";
-            $params[$paramName] = $where[1];
+        if (empty($conditions)) {
+            throw new \RuntimeException('Delete requires at least one WHERE condition');
         }
 
         $sql = "DELETE FROM {$this->table} WHERE " . implode(' AND ', $conditions);
@@ -413,63 +437,55 @@ class TableHelper
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
+        // بازنشانی بعد از اجرا
+        $this->reset();
+
         return $stmt->rowCount();
     }
 
     /**
      * شمارش تعداد رکوردها
-     *
-     * @return int
      */
-    public function count()
+    public function count(): int
     {
         $sql = "SELECT COUNT(*) AS count FROM {$this->table}";
-        $params = [];
+        [$conditions, $params] = $this->buildWhere();
 
-        if (!empty($this->wheres)) {
-            $conditions = [];
-            foreach ($this->wheres as $index => $where) {
-                $paramName = ":where_{$index}";
-                $conditions[] = "{$where[0]} = {$paramName}";
-                $params[$paramName] = $where[1];
-            }
+        if (!empty($conditions)) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
-        return (int)$stmt->fetch(\PDO::FETCH_ASSOC)['count'];
+        // بازنشانی بعد از اجرا
+        $this->reset();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return (int)($result['count'] ?? 0);
     }
 
     /**
      * یافتن یا ایجاد یک رکورد
      *
-     * @param array $search شرایط جستجو
-     * @param array $data داده‌های اضافی برای ایجاد
-     * @return array
+     * @param array<string, mixed> $search شرایط جستجو
+     * @param array<string, mixed> $data داده‌های اضافی برای ایجاد
+     * @return array<string, mixed>|null
      */
-    public function firstOrCreate($search, $data = [])
+    public function firstOrCreate(array $search, array $data = []): ?array
     {
-        // بازنشانی شرط‌های قبلی
-        $this->wheres = [];
-
-        // اضافه کردن شرط‌های جستجو
         foreach ($search as $column => $value) {
             $this->where($column, $value);
         }
 
-        // تلاش برای یافتن رکورد
         $record = $this->first();
 
         if ($record) {
             return $record;
         }
 
-        // ایجاد رکورد جدید اگر یافت نشد
         $insertData = array_merge($search, $data);
         $id = $this->insert($insertData);
-
         return $this->find($id);
     }
 
@@ -478,9 +494,8 @@ class TableHelper
      *
      * @param string $column نام ستون
      * @param mixed $value مقدار
-     * @return $this
      */
-    public function where($column, $value)
+    public function where(string $column, mixed $value): self
     {
         $this->wheres[] = [$column, $value];
         return $this;
@@ -489,22 +504,21 @@ class TableHelper
     /**
      * دریافت اولین رکورد
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      */
-    public function first()
+    public function first(): ?array
     {
         $this->limit(1);
         $results = $this->get();
-        return $results[0] ?? null;
+        return !empty($results) ? $results[0] : null;
     }
 
     /**
      * محدود کردن نتایج
      *
      * @param int $limit تعداد
-     * @return $this
      */
-    public function limit($limit)
+    public function limit(int $limit): self
     {
         $this->limit = $limit;
         return $this;
@@ -513,19 +527,23 @@ class TableHelper
     /**
      * درج رکورد جدید
      *
-     * @param array $data داده‌ها
-     * @return int
+     * @param array<string, mixed> $data داده‌ها
+     * @return int ID رکورد جدید
      */
-    public function insert($data)
+    public function insert(array $data): int
     {
+        if (empty($data)) {
+            return 0;
+        }
+
         $columns = implode(', ', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
 
         $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
 
         $params = [];
-        foreach ($data as $key => $value) {
-            $params[":{$key}"] = $value;
+        foreach ($data as $column => $value) {
+            $params[":{$column}"] = $value;
         }
 
         $stmt = $this->db->prepare($sql);
@@ -535,16 +553,16 @@ class TableHelper
     }
 
     /**
-     * یافتن رکورد با شناسه
+     * یافتن یک رکورد با ID
      *
      * @param int|string $id شناسه
-     * @return array|null
+     * @return array<string, mixed>|null
      */
-    public function find($id)
+    public function find(int|string $id): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id LIMIT 1";
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id = :id LIMIT 1");
         $stmt->execute([':id' => $id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result ?: null;
     }
 }

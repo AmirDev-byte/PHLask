@@ -63,11 +63,11 @@ class Stream implements StreamInterface
         $mode = $meta['mode'] ?? '';
 
         // تشخیص قابلیت خواندن و نوشتن بر اساس حالت فایل
-        if (strpos($mode, 'r') !== false || strpos($mode, '+') !== false) {
+        if (str_contains($mode, 'r') || str_contains($mode, '+')) {
             $this->readable = true;
         }
 
-        if (strpos($mode, 'w') !== false || strpos($mode, 'a') !== false || strpos($mode, '+') !== false) {
+        if (str_contains($mode, 'w') || str_contains($mode, 'a') || str_contains($mode, '+')) {
             $this->writable = true;
         }
 

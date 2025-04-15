@@ -17,23 +17,27 @@ use Psr\Http\Message\ResponseInterface;
 class App
 {
     /**
-     * @var App نمونه واحد (Singleton)
+     * @var App|null نمونه واحد (Singleton)
      */
     private static ?App $instance = null;
+
     /**
      * @var Router مسیریاب برنامه
      */
     private Router $router;
+
     /**
      * @var MiddlewareHandler اجراکننده میان‌افزارها
      */
     private MiddlewareHandler $middlewareHandler;
+
     /**
      * @var ContainerInterface|null کانتینر وابستگی‌ها (اختیاری)
      */
     private ?ContainerInterface $container = null;
+
     /**
-     * @var array مدیریت‌کننده‌های خطا
+     * @var array<int, callable> مدیریت‌کننده‌های خطا
      */
     private array $errorHandlers = [];
 
@@ -48,10 +52,8 @@ class App
 
     /**
      * دریافت نمونه واحد از کلاس App (الگوی Singleton)
-     *
-     * @return App
      */
-    public static function getInstance(): App
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -61,8 +63,6 @@ class App
 
     /**
      * دریافت کانتینر وابستگی‌ها
-     *
-     * @return ContainerInterface|null
      */
     public function getContainer(): ?ContainerInterface
     {
@@ -71,11 +71,8 @@ class App
 
     /**
      * تنظیم کانتینر وابستگی‌ها (PSR-11)
-     *
-     * @param ContainerInterface $container
-     * @return App
      */
-    public function setContainer(ContainerInterface $container): App
+    public function setContainer(ContainerInterface $container): self
     {
         $this->container = $container;
         return $this;
@@ -83,8 +80,6 @@ class App
 
     /**
      * دریافت مسیریاب برنامه
-     *
-     * @return Router
      */
     public function getRouter(): Router
     {
@@ -96,9 +91,8 @@ class App
      *
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return App
      */
-    public function get(string $path, callable $handler): App
+    public function get(string $path, callable $handler): self
     {
         $this->router->addRoute('GET', $path, $handler);
         return $this;
@@ -109,9 +103,8 @@ class App
      *
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return App
      */
-    public function post(string $path, callable $handler): App
+    public function post(string $path, callable $handler): self
     {
         $this->router->addRoute('POST', $path, $handler);
         return $this;
@@ -122,9 +115,8 @@ class App
      *
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return App
      */
-    public function put(string $path, callable $handler): App
+    public function put(string $path, callable $handler): self
     {
         $this->router->addRoute('PUT', $path, $handler);
         return $this;
@@ -135,9 +127,8 @@ class App
      *
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return App
      */
-    public function delete(string $path, callable $handler): App
+    public function delete(string $path, callable $handler): self
     {
         $this->router->addRoute('DELETE', $path, $handler);
         return $this;
@@ -148,9 +139,8 @@ class App
      *
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return App
      */
-    public function patch(string $path, callable $handler): App
+    public function patch(string $path, callable $handler): self
     {
         $this->router->addRoute('PATCH', $path, $handler);
         return $this;
@@ -161,9 +151,8 @@ class App
      *
      * @param string $path مسیر
      * @param callable $handler تابع پاسخگو
-     * @return App
      */
-    public function options(string $path, callable $handler): App
+    public function options(string $path, callable $handler): self
     {
         $this->router->addRoute('OPTIONS', $path, $handler);
         return $this;
@@ -173,9 +162,8 @@ class App
      * افزودن میان‌افزار به برنامه
      *
      * @param mixed $middleware میان‌افزار (پیاده‌سازی PSR-15 یا تابع)
-     * @return App
      */
-    public function middleware($middleware): App
+    public function middleware(mixed $middleware): self
     {
         $this->middlewareHandler->add($middleware);
         return $this;
@@ -186,9 +174,8 @@ class App
      *
      * @param int $code کد خطا
      * @param callable $handler تابع مدیریت‌کننده خطا
-     * @return App
      */
-    public function errorHandler(int $code, callable $handler): App
+    public function errorHandler(int $code, callable $handler): self
     {
         $this->errorHandlers[$code] = $handler;
         return $this;
@@ -196,8 +183,6 @@ class App
 
     /**
      * اجرای برنامه و پاسخگویی به درخواست
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -278,7 +263,6 @@ class App
      * @param int $code کد خطا
      * @param Request $request درخواست
      * @param \Throwable|null $exception استثنا (اختیاری)
-     * @return ResponseInterface
      */
     private function handleError(int $code, Request $request, ?\Throwable $exception = null): ResponseInterface
     {
@@ -306,9 +290,8 @@ class App
      *
      * @param mixed $result نتیجه اجرای مسیر
      * @param Response $response شیء پاسخ
-     * @return ResponseInterface
      */
-    private function processRouteResult($result, Response $response): ResponseInterface
+    private function processRouteResult(mixed $result, Response $response): ResponseInterface
     {
         if ($result instanceof ResponseInterface) {
             return $result;

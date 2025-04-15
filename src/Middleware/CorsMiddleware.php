@@ -15,14 +15,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 class CorsMiddleware implements MiddlewareInterface
 {
     /**
-     * @var array تنظیمات CORS
+     * @var array<string, mixed> تنظیمات CORS
      */
     private array $options;
 
     /**
      * سازنده کلاس CorsMiddleware
      *
-     * @param array $options تنظیمات CORS
+     * @param array<string, mixed> $options تنظیمات CORS
      */
     public function __construct(array $options = [])
     {
@@ -55,7 +55,6 @@ class CorsMiddleware implements MiddlewareInterface
      * مدیریت درخواست preflight (OPTIONS)
      *
      * @param ServerRequestInterface $request درخواست
-     * @return ResponseInterface
      */
     private function handlePreflight(ServerRequestInterface $request): ResponseInterface
     {
@@ -67,7 +66,7 @@ class CorsMiddleware implements MiddlewareInterface
 
         // افزودن هدرهای اضافی برای preflight
         $requestMethod = $request->getHeaderLine('Access-Control-Request-Method');
-        if (!empty($requestMethod) && in_array($requestMethod, $this->options['allowedMethods'])) {
+        if (!empty($requestMethod) && in_array($requestMethod, $this->options['allowedMethods'], true)) {
             $response = $response->withHeader('Access-Control-Allow-Methods', implode(', ', $this->options['allowedMethods']));
         }
 
@@ -87,7 +86,6 @@ class CorsMiddleware implements MiddlewareInterface
      *
      * @param ServerRequestInterface $request درخواست
      * @param ResponseInterface $response پاسخ
-     * @return ResponseInterface
      */
     private function addCorsHeaders(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
@@ -97,9 +95,9 @@ class CorsMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        if (in_array('*', $this->options['allowedOrigins'])) {
+        if (in_array('*', $this->options['allowedOrigins'], true)) {
             $response = $response->withHeader('Access-Control-Allow-Origin', '*');
-        } elseif (in_array($origin, $this->options['allowedOrigins'])) {
+        } elseif (in_array($origin, $this->options['allowedOrigins'], true)) {
             $response = $response->withHeader('Access-Control-Allow-Origin', $origin);
             $response = $response->withHeader('Vary', 'Origin');
         }

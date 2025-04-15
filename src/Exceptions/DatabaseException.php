@@ -10,7 +10,7 @@ namespace PHLask\Exceptions;
 class DatabaseException extends \Exception
 {
     /**
-     * @var array|null اطلاعات اضافی خطا
+     * @var array<string, mixed>|null اطلاعات اضافی خطا
      */
     private ?array $details;
 
@@ -23,14 +23,14 @@ class DatabaseException extends \Exception
      * سازنده کلاس DatabaseException
      *
      * @param string $message پیام خطا
-     * @param int $code کد خطا
+     * @param int|string $code کد خطا
      * @param string|null $query کوئری SQL
-     * @param array|null $details اطلاعات اضافی
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      * @param \Throwable|null $previous خطای قبلی
      */
     public function __construct(
         string      $message = '',
-        int         $code = 0,
+        int|string  $code = 0,
         ?string     $query = null,
         ?array      $details = null,
         ?\Throwable $previous = null
@@ -39,21 +39,20 @@ class DatabaseException extends \Exception
         $this->query = $query;
         $this->details = $details;
 
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, is_numeric($code) ? (int)$code : 0, $previous);
     }
 
     /**
      * ایجاد استثنا برای خطای اتصال به پایگاه داده
      *
      * @param string $message پیام خطا
-     * @param int $code کد خطا
-     * @param array|null $details اطلاعات اضافی
+     * @param int|string $code کد خطا
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      * @param \Throwable|null $previous خطای قبلی
-     * @return self
      */
     public static function connectionError(
         string      $message = 'Database connection error',
-        int         $code = 0,
+        int|string  $code = 0,
         ?array      $details = null,
         ?\Throwable $previous = null
     ): self
@@ -66,15 +65,14 @@ class DatabaseException extends \Exception
      *
      * @param string $message پیام خطا
      * @param string $query کوئری SQL
-     * @param int $code کد خطا
-     * @param array|null $details اطلاعات اضافی
+     * @param int|string $code کد خطا
+     * @param array<string, mixed>|null $details اطلاعات اضافی
      * @param \Throwable|null $previous خطای قبلی
-     * @return self
      */
     public static function queryError(
         string      $message = 'Database query error',
         string      $query = '',
-        int         $code = 0,
+        int|string  $code = 0,
         ?array      $details = null,
         ?\Throwable $previous = null
     ): self
@@ -84,8 +82,6 @@ class DatabaseException extends \Exception
 
     /**
      * دریافت کوئری SQL که باعث ایجاد خطا شده است
-     *
-     * @return string|null
      */
     public function getQuery(): ?string
     {
@@ -95,7 +91,7 @@ class DatabaseException extends \Exception
     /**
      * دریافت اطلاعات اضافی خطا
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function getDetails(): ?array
     {

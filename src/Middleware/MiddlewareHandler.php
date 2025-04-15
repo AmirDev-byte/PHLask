@@ -15,7 +15,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class MiddlewareHandler implements RequestHandlerInterface
 {
     /**
-     * @var array میان‌افزارها
+     * @var array<int, mixed> میان‌افزارها
      */
     private array $middlewares = [];
 
@@ -28,9 +28,8 @@ class MiddlewareHandler implements RequestHandlerInterface
      * افزودن میان‌افزار
      *
      * @param mixed $middleware میان‌افزار (کلاس PSR-15 یا تابع)
-     * @return self
      */
-    public function add($middleware): self
+    public function add(mixed $middleware): self
     {
         $this->middlewares[] = $middleware;
         return $this;
@@ -38,8 +37,6 @@ class MiddlewareHandler implements RequestHandlerInterface
 
     /**
      * بررسی وجود میان‌افزار
-     *
-     * @return bool
      */
     public function hasMiddlewares(): bool
     {
@@ -49,7 +46,7 @@ class MiddlewareHandler implements RequestHandlerInterface
     /**
      * دریافت لیست میان‌افزارها
      *
-     * @return array
+     * @return array<int, mixed>
      */
     public function getMiddlewares(): array
     {
@@ -60,7 +57,6 @@ class MiddlewareHandler implements RequestHandlerInterface
      * تنظیم پاسخگوی نهایی
      *
      * @param RequestHandlerInterface $handler پاسخگوی نهایی
-     * @return self
      */
     public function setFallbackHandler(RequestHandlerInterface $handler): self
     {
@@ -82,7 +78,6 @@ class MiddlewareHandler implements RequestHandlerInterface
      *
      * @param int $index موقعیت میان‌افزار
      * @param ServerRequestInterface $request درخواست
-     * @return ResponseInterface
      */
     public function processMiddleware(int $index, ServerRequestInterface $request): ResponseInterface
     {
@@ -120,9 +115,7 @@ class MiddlewareHandler implements RequestHandlerInterface
             return $middleware->process($request, $handler);
         } elseif (is_callable($middleware)) {
             // تبدیل $handler به یک تابع قابل فراخوانی برای میان‌افزارهای ساده
-            $next = function ($req) use ($handler) {
-                return $handler->handle($req);
-            };
+            $next = fn($req) => $handler->handle($req);
 
             // تلاش برای اجرای میان‌افزار با فرمت ساده
             $result = call_user_func($middleware, $request, $next);

@@ -13,7 +13,7 @@ class EasyDB
     private \PDO $pdo;
 
     /**
-     * @var array جداول تعریف شده
+     * @var array<string, Table> جداول تعریف شده
      */
     private array $tables = [];
 
@@ -23,7 +23,7 @@ class EasyDB
      * @param string $dsn آدرس اتصال به پایگاه داده
      * @param string|null $username نام کاربری (برای SQLite نیاز نیست)
      * @param string|null $password رمز عبور (برای SQLite نیاز نیست)
-     * @param array $options تنظیمات اضافی
+     * @param array<int, mixed> $options تنظیمات اضافی
      */
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, array $options = [])
     {
@@ -40,7 +40,6 @@ class EasyDB
      * ایجاد اتصال به پایگاه داده SQLite
      *
      * @param string $path مسیر فایل SQLite
-     * @return EasyDB
      */
     public static function sqlite(string $path): self
     {
@@ -55,9 +54,14 @@ class EasyDB
      * @param string $password رمز عبور
      * @param string $host نام هاست
      * @param int $port پورت
-     * @return EasyDB
      */
-    public static function mysql(string $database, string $username, string $password, string $host = 'localhost', int $port = 3306): self
+    public static function mysql(
+        string $database,
+        string $username,
+        string $password,
+        string $host = 'localhost',
+        int    $port = 3306
+    ): self
     {
         $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
         return new self($dsn, $username, $password);
@@ -67,7 +71,6 @@ class EasyDB
      * دسترسی به یک جدول
      *
      * @param string $name نام جدول
-     * @return Table
      */
     public function table(string $name): Table
     {
@@ -81,8 +84,8 @@ class EasyDB
      * اجرای کوئری خام
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترها
-     * @return array نتایج
+     * @param array<string, mixed> $params پارامترها
+     * @return array<int, array<string, mixed>> نتایج
      */
     public function query(string $query, array $params = []): array
     {
@@ -93,8 +96,6 @@ class EasyDB
 
     /**
      * شروع تراکنش
-     *
-     * @return bool
      */
     public function beginTransaction(): bool
     {
@@ -103,8 +104,6 @@ class EasyDB
 
     /**
      * تایید تراکنش
-     *
-     * @return bool
      */
     public function commit(): bool
     {
@@ -113,8 +112,6 @@ class EasyDB
 
     /**
      * بازگشت تراکنش
-     *
-     * @return bool
      */
     public function rollBack(): bool
     {
@@ -138,17 +135,17 @@ class Table
     private \PDO $pdo;
 
     /**
-     * @var array شرط‌های where
+     * @var array<int, array{0: string, 1: mixed}> شرط‌های where
      */
     private array $wheres = [];
 
     /**
-     * @var array پارامترهای شرط‌ها
+     * @var array<string, mixed> پارامترهای شرط‌ها
      */
     private array $params = [];
 
     /**
-     * @var array|null دستورات order by
+     * @var array<int, array{column: string, direction: string}>|null دستورات order by
      */
     private ?array $orders = null;
 
@@ -179,10 +176,10 @@ class Table
      *
      * @param string $column نام ستون
      * @param string $direction جهت مرتب‌سازی
-     * @return $this
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
+        $this->orders ??= [];
         $this->orders[] = [
             'column' => $column,
             'direction' => strtoupper($direction)
@@ -194,7 +191,6 @@ class Table
      * تعیین شروع نتایج
      *
      * @param int $offset مقدار جابجایی
-     * @return $this
      */
     public function offset(int $offset): self
     {
@@ -205,7 +201,7 @@ class Table
     /**
      * دریافت همه رکوردها
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function all(): array
     {
@@ -215,12 +211,12 @@ class Table
     /**
      * دریافت نتایج براساس شرایط
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function get(): array
     {
         $sql = "SELECT * FROM {$this->name}";
-        list($whereSql, $params) = $this->buildWhere();
+        [$whereSql, $params] = $this->buildWhere();
 
         if (!empty($whereSql)) {
             $sql .= " WHERE " . $whereSql;
@@ -254,7 +250,7 @@ class Table
     /**
      * ساخت بخش WHERE کوئری
      *
-     * @return array
+     * @return array{0: string, 1: array<string, mixed>}
      */
     private function buildWhere(): array
     {
@@ -266,9 +262,9 @@ class Table
         $params = [];
 
         foreach ($this->wheres as $index => $where) {
-            $paramName = ":{$where['column']}_{$index}";
-            $conditions[] = "{$where['column']} {$where['operator']} {$paramName}";
-            $params[$paramName] = $where['value'];
+            $paramName = ":{$where[0]}_{$index}";
+            $conditions[] = "{$where[0]} = {$paramName}";
+            $params[$paramName] = $where[1];
         }
 
         return [implode(' AND ', $conditions), $params];
@@ -289,12 +285,12 @@ class Table
     /**
      * به‌روزرسانی رکوردها
      *
-     * @param array $data داده‌ها
+     * @param array<string, mixed> $data داده‌ها
      * @return int تعداد رکوردهای به‌روزرسانی شده
      */
     public function update(array $data): int
     {
-        list($whereSql, $whereParams) = $this->buildWhere();
+        [$whereSql, $whereParams] = $this->buildWhere();
 
         if (empty($whereSql)) {
             throw new \RuntimeException('Update requires at least one WHERE condition');
@@ -328,7 +324,7 @@ class Table
      */
     public function delete(): int
     {
-        list($whereSql, $whereParams) = $this->buildWhere();
+        [$whereSql, $whereParams] = $this->buildWhere();
 
         if (empty($whereSql)) {
             throw new \RuntimeException('Delete requires at least one WHERE condition');
@@ -347,13 +343,11 @@ class Table
 
     /**
      * شمارش تعداد رکوردها
-     *
-     * @return int
      */
     public function count(): int
     {
         $sql = "SELECT COUNT(*) AS count FROM {$this->name}";
-        list($whereSql, $params) = $this->buildWhere();
+        [$whereSql, $params] = $this->buildWhere();
 
         if (!empty($whereSql)) {
             $sql .= " WHERE " . $whereSql;
@@ -366,17 +360,17 @@ class Table
         $this->reset();
 
         $result = $stmt->fetch();
-        return (int)$result['count'];
+        return (int)($result['count'] ?? 0);
     }
 
     /**
      * یافتن یا ایجاد یک رکورد
      *
-     * @param array $search شرایط جستجو
-     * @param array $data داده‌های اضافی برای ایجاد
-     * @return array
+     * @param array<string, mixed> $search شرایط جستجو
+     * @param array<string, mixed> $data داده‌های اضافی برای ایجاد
+     * @return array<string, mixed>|null
      */
-    public function firstOrCreate(array $search, array $data = []): array
+    public function firstOrCreate(array $search, array $data = []): ?array
     {
         foreach ($search as $column => $value) {
             $this->where($column, $value);
@@ -398,22 +392,17 @@ class Table
      *
      * @param string $column نام ستون
      * @param mixed $value مقدار
-     * @return $this
      */
-    public function where(string $column, $value): self
+    public function where(string $column, mixed $value): self
     {
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => '=',
-            'value' => $value
-        ];
+        $this->wheres[] = [$column, $value];
         return $this;
     }
 
     /**
-     * دریافت اولین رکورد براساس شرایط
+     * دریافت اولین رکورد
      *
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function first(): ?array
     {
@@ -426,7 +415,6 @@ class Table
      * محدود کردن نتایج
      *
      * @param int $limit تعداد
-     * @return $this
      */
     public function limit(int $limit): self
     {
@@ -437,15 +425,17 @@ class Table
     /**
      * درج رکورد جدید
      *
-     * @param array $data داده‌ها
+     * @param array<string, mixed> $data داده‌ها
      * @return int ID رکورد جدید
      */
     public function insert(array $data): int
     {
+        if (empty($data)) {
+            return 0;
+        }
+
         $columns = array_keys($data);
-        $placeholders = array_map(function ($col) {
-            return ":{$col}";
-        }, $columns);
+        $placeholders = array_map(fn($col) => ":{$col}", $columns);
 
         $sql = "INSERT INTO {$this->name} (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
 
@@ -464,9 +454,9 @@ class Table
      * یافتن یک رکورد با ID
      *
      * @param int|string $id شناسه
-     * @return array|null
+     * @return array<string, mixed>|null
      */
-    public function find($id): ?array
+    public function find(int|string $id): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM {$this->name} WHERE id = :id LIMIT 1");
         $stmt->execute([':id' => $id]);

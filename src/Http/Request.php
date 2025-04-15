@@ -19,7 +19,7 @@ class Request implements ServerRequestInterface
     private string $protocolVersion = '1.1';
 
     /**
-     * @var array هدرهای درخواست
+     * @var array<string, array<int, string>> هدرهای درخواست
      */
     private array $headers = [];
 
@@ -39,37 +39,37 @@ class Request implements ServerRequestInterface
     private UriInterface $uri;
 
     /**
-     * @var array پارامترهای مسیر
+     * @var array<string, string> پارامترهای مسیر
      */
     private array $params = [];
 
     /**
-     * @var array پارامترهای کوئری
+     * @var array<string, mixed> پارامترهای کوئری
      */
     private array $queryParams = [];
 
     /**
-     * @var array|object|null بدنه پردازش شده
+     * @var array<string, mixed>|object|null بدنه پردازش شده
      */
-    private $parsedBody = null;
+    private array|object|null $parsedBody = null;
 
     /**
-     * @var array پارامترهای کوکی
+     * @var array<string, mixed> پارامترهای کوکی
      */
     private array $cookieParams = [];
 
     /**
-     * @var array فایل‌های آپلود شده
+     * @var array<string, mixed> فایل‌های آپلود شده
      */
     private array $uploadedFiles = [];
 
     /**
-     * @var array ویژگی‌های سرور
+     * @var array<string, mixed> ویژگی‌های سرور
      */
     private array $serverParams = [];
 
     /**
-     * @var array ویژگی‌های درخواست
+     * @var array<string, mixed> ویژگی‌های درخواست
      */
     private array $attributes = [];
 
@@ -78,8 +78,8 @@ class Request implements ServerRequestInterface
      *
      * @param string $method متد HTTP
      * @param UriInterface $uri آدرس درخواست
-     * @param array $headers هدرهای درخواست
-     * @param StreamInterface $body بدنه درخواست
+     * @param array<string, array<int, string>|string> $headers هدرهای درخواست
+     * @param StreamInterface|null $body بدنه درخواست
      * @param string $version نسخه پروتکل
      */
     public function __construct(
@@ -92,17 +92,20 @@ class Request implements ServerRequestInterface
     {
         $this->method = $method;
         $this->uri = $uri;
-        $this->headers = $headers;
+
+        // نرمال‌سازی هدرها
+        foreach ($headers as $name => $value) {
+            $this->headers[$name] = is_array($value) ? $value : [$value];
+        }
+
         $this->body = $body ?? new Stream(fopen('php://temp', 'r+'));
         $this->protocolVersion = $version;
     }
 
     /**
      * ایجاد درخواست از متغیرهای سراسری PHP
-     *
-     * @return Request
      */
-    public static function fromGlobals(): Request
+    public static function fromGlobals(): self
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $uri = Uri::fromGlobals();
@@ -110,10 +113,10 @@ class Request implements ServerRequestInterface
         // استخراج هدرها
         $headers = [];
         foreach ($_SERVER as $key => $value) {
-            if (strpos($key, 'HTTP_') === 0) {
+            if (str_starts_with($key, 'HTTP_')) {
                 $name = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
                 $headers[$name] = $value;
-            } elseif (in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH'])) {
+            } elseif (in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH'], true)) {
                 $name = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($key))));
                 $headers[$name] = $value;
             }
@@ -143,8 +146,7 @@ class Request implements ServerRequestInterface
     /**
      * تنظیم پارامترهای سرور
      *
-     * @param array $serverParams
-     * @return self
+     * @param array<string, mixed> $serverParams
      */
     public function withServerParams(array $serverParams): self
     {
@@ -176,10 +178,9 @@ class Request implements ServerRequestInterface
     /**
      * تنظیم پارامترهای مسیر
      *
-     * @param array $params پارامترهای مسیر
-     * @return Request
+     * @param array<string, string> $params پارامترهای مسیر
      */
-    public function withParams(array $params): Request
+    public function withParams(array $params): self
     {
         $clone = clone $this;
         $clone->params = $params;
@@ -189,7 +190,7 @@ class Request implements ServerRequestInterface
     /**
      * دریافت پارامترهای مسیر
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getParams(): array
     {
@@ -203,7 +204,7 @@ class Request implements ServerRequestInterface
      * @param mixed $default مقدار پیش‌فرض
      * @return mixed
      */
-    public function param(string $name, $default = null)
+    public function param(string $name, mixed $default = null): mixed
     {
         return $this->params[$name] ?? $default;
     }
@@ -215,7 +216,7 @@ class Request implements ServerRequestInterface
      * @param mixed $default مقدار پیش‌فرض
      * @return mixed
      */
-    public function input(string $name, $default = null)
+    public function input(string $name, mixed $default = null): mixed
     {
         if (is_array($this->parsedBody)) {
             return $this->parsedBody[$name] ?? $default;
@@ -231,9 +232,9 @@ class Request implements ServerRequestInterface
     /**
      * دریافت تمام داده‌های بدنه درخواست
      *
-     * @return array|object|null
+     * @return array<string, mixed>|object|null
      */
-    public function all()
+    public function all(): array|object|null
     {
         return $this->parsedBody;
     }
@@ -245,15 +246,13 @@ class Request implements ServerRequestInterface
      * @param mixed $default مقدار پیش‌فرض
      * @return mixed
      */
-    public function query(string $name, $default = null)
+    public function query(string $name, mixed $default = null): mixed
     {
         return $this->queryParams[$name] ?? $default;
     }
 
     /**
      * بررسی اینکه درخواست از نوع AJAX است
-     *
-     * @return bool
      */
     public function isAjax(): bool
     {
@@ -280,7 +279,7 @@ class Request implements ServerRequestInterface
         $name = strtolower($name);
         foreach ($this->headers as $key => $value) {
             if (strtolower($key) === $name) {
-                return is_array($value) ? $value : [$value];
+                return $value;
             }
         }
         return [];
@@ -288,13 +287,11 @@ class Request implements ServerRequestInterface
 
     /**
      * بررسی اینکه درخواست از نوع JSON است
-     *
-     * @return bool
      */
     public function isJson(): bool
     {
         $contentType = $this->getHeaderLine('Content-Type');
-        return strpos($contentType, 'application/json') !== false;
+        return str_contains($contentType, 'application/json');
     }
 
     /**
@@ -334,16 +331,16 @@ class Request implements ServerRequestInterface
 
         $clone = clone $this;
         $values = $this->getHeader($name);
-        $values = array_merge($values, is_array($value) ? $value : [$value]);
+        $newValues = array_merge($values, is_array($value) ? $value : [$value]);
 
         foreach ($clone->headers as $key => $existingValue) {
             if (strtolower($key) === strtolower($name)) {
-                $clone->headers[$key] = $values;
+                $clone->headers[$key] = $newValues;
                 return $clone;
             }
         }
 
-        $clone->headers[$name] = $values;
+        $clone->headers[$name] = $newValues;
         return $clone;
     }
 
@@ -431,7 +428,7 @@ class Request implements ServerRequestInterface
     public function withRequestTarget($requestTarget): self
     {
         $clone = clone $this;
-        // در این پیاده‌سازی ساده، این متد پشتیبانی نمی‌شود
+        // در این پیاده‌سازی ساده، این متد پشتیبانی کامل ندارد
         // زیرا URI خود را از requestTarget استخراج نمی‌کنیم
         return $clone;
     }

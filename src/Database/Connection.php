@@ -14,22 +14,24 @@ use PHLask\Exceptions\DatabaseException;
 class Connection
 {
     /**
-     * @var array اتصال‌های ایجاد شده
+     * @var array<string, self> اتصال‌های ایجاد شده
      */
     private static array $connections = [];
+
     /**
      * @var PDO نمونه PDO برای اتصال به پایگاه داده
      */
     private PDO $pdo;
+
     /**
-     * @var array تنظیمات اتصال
+     * @var array<string, mixed> تنظیمات اتصال
      */
     private array $config;
 
     /**
      * سازنده کلاس Connection
      *
-     * @param array $config تنظیمات اتصال
+     * @param array<string, mixed> $config تنظیمات اتصال
      * @throws DatabaseException در صورت خطا در اتصال
      */
     public function __construct(array $config)
@@ -56,7 +58,6 @@ class Connection
     /**
      * ایجاد اتصال به پایگاه داده
      *
-     * @return void
      * @throws DatabaseException در صورت خطا در اتصال
      */
     private function connect(): void
@@ -88,41 +89,33 @@ class Connection
     {
         $driver = $this->config['driver'];
 
-        switch ($driver) {
-            case 'mysql':
-                return sprintf(
-                    'mysql:host=%s;port=%d;dbname=%s;charset=%s',
-                    $this->config['host'],
-                    $this->config['port'],
-                    $this->config['database'],
-                    $this->config['charset']
-                );
-
-            case 'pgsql':
-                return sprintf(
-                    'pgsql:host=%s;port=%d;dbname=%s',
-                    $this->config['host'],
-                    $this->config['port'],
-                    $this->config['database']
-                );
-
-            case 'sqlite':
-                return 'sqlite:' . $this->config['database'];
-
-            default:
-                throw new \InvalidArgumentException('Unsupported database driver: ' . $driver);
-        }
+        return match ($driver) {
+            'mysql' => sprintf(
+                'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+                $this->config['host'],
+                $this->config['port'],
+                $this->config['database'],
+                $this->config['charset']
+            ),
+            'pgsql' => sprintf(
+                'pgsql:host=%s;port=%d;dbname=%s',
+                $this->config['host'],
+                $this->config['port'],
+                $this->config['database']
+            ),
+            'sqlite' => 'sqlite:' . $this->config['database'],
+            default => throw new \InvalidArgumentException('Unsupported database driver: ' . $driver)
+        };
     }
 
     /**
      * ایجاد یا دریافت اتصال
      *
      * @param string $name نام اتصال
-     * @param array|null $config پیکربندی اتصال (فقط برای ایجاد اتصال جدید)
-     * @return Connection
+     * @param array<string, mixed>|null $config پیکربندی اتصال (فقط برای ایجاد اتصال جدید)
      * @throws DatabaseException در صورت خطا در اتصال
      */
-    public static function connection(string $name = 'default', ?array $config = null): Connection
+    public static function connection(string $name = 'default', ?array $config = null): self
     {
         if (!isset(self::$connections[$name])) {
             if ($config === null) {
@@ -137,8 +130,6 @@ class Connection
 
     /**
      * دریافت نمونه PDO
-     *
-     * @return PDO
      */
     public function getPdo(): PDO
     {
@@ -148,7 +139,7 @@ class Connection
     /**
      * دریافت پیکربندی اتصال
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getConfig(): array
     {
@@ -159,8 +150,8 @@ class Connection
      * دریافت نتیجه تک سطری
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترهای کوئری
-     * @return array|null سطر نتیجه یا null در صورت عدم وجود
+     * @param array<string, mixed> $params پارامترهای کوئری
+     * @return array<string, mixed>|null سطر نتیجه یا null در صورت عدم وجود
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
     public function fetchOne(string $query, array $params = []): ?array
@@ -174,8 +165,7 @@ class Connection
      * اجرای کوئری SQL
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترهای کوئری
-     * @return \PDOStatement
+     * @param array<string, mixed> $params پارامترهای کوئری
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
     public function query(string $query, array $params = []): \PDOStatement
@@ -199,8 +189,8 @@ class Connection
      * دریافت تمام نتایج
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترهای کوئری
-     * @return array آرایه‌ای از سطرهای نتیجه
+     * @param array<string, mixed> $params پارامترهای کوئری
+     * @return array<int, array<string, mixed>> آرایه‌ای از سطرهای نتیجه
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
     public function fetchAll(string $query, array $params = []): array
@@ -213,9 +203,9 @@ class Connection
      * دریافت یک ستون از نتایج
      *
      * @param string $query کوئری SQL
-     * @param array $params پارامترهای کوئری
+     * @param array<string, mixed> $params پارامترهای کوئری
      * @param int $columnIndex شماره ستون (پیش‌فرض: 0)
-     * @return array آرایه‌ای از مقادیر ستون
+     * @return array<int, mixed> آرایه‌ای از مقادیر ستون
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
     public function fetchColumn(string $query, array $params = [], int $columnIndex = 0): array
@@ -236,7 +226,7 @@ class Connection
      * درج داده‌ها در جدول
      *
      * @param string $table نام جدول
-     * @param array $data داده‌های برای درج
+     * @param array<string, mixed> $data داده‌های برای درج
      * @return int آیدی آخرین رکورد درج شده
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
@@ -247,9 +237,7 @@ class Connection
         }
 
         $columns = array_keys($data);
-        $placeholders = array_map(function ($column) {
-            return ':' . $column;
-        }, $columns);
+        $placeholders = array_map(fn($column) => ':' . $column, $columns);
 
         $query = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
@@ -271,9 +259,9 @@ class Connection
      * به‌روزرسانی داده‌ها در جدول
      *
      * @param string $table نام جدول
-     * @param array $data داده‌های برای به‌روزرسانی
+     * @param array<string, mixed> $data داده‌های برای به‌روزرسانی
      * @param string $where شرط به‌روزرسانی
-     * @param array $params پارامترهای شرط
+     * @param array<string, mixed> $params پارامترهای شرط
      * @return int تعداد رکوردهای تغییر یافته
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
@@ -310,7 +298,7 @@ class Connection
      *
      * @param string $table نام جدول
      * @param string $where شرط حذف
-     * @param array $params پارامترهای شرط
+     * @param array<string, mixed> $params پارامترهای شرط
      * @return int تعداد رکوردهای حذف شده
      * @throws DatabaseException در صورت خطا در اجرای کوئری
      */
@@ -325,11 +313,12 @@ class Connection
     /**
      * اجرای تراکنش
      *
-     * @param callable $callback تابع حاوی عملیات تراکنش
-     * @return mixed نتیجه تابع callback
+     * @template T
+     * @param callable(self): T $callback تابع حاوی عملیات تراکنش
+     * @return T نتیجه تابع callback
      * @throws \Exception در صورت خطا در اجرای تراکنش
      */
-    public function transaction(callable $callback)
+    public function transaction(callable $callback): mixed
     {
         try {
             $this->pdo->beginTransaction();

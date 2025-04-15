@@ -6,7 +6,9 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use PHLask\App;
+use PHLask\Exceptions\HttpException;
 use PHLask\Http\Request;
+use PHLask\Http\Response;
 
 // ایجاد نمونه از برنامه
 $app = new App();
@@ -23,13 +25,13 @@ $app->enableDatabase([
 ]);
 
 // دریافت لیست کاربران
-$app->get('/users', function (Request $request) use ($app) {
+$app->get('/users', function (Request $request) use ($app): array {
     // استفاده از QueryBuilder
     $query = $app->db()->table('users');
 
     // اعمال فیلترها
-    if ($request->query('name')) {
-        $query->whereLike('name', '%' . $request->query('name') . '%');
+    if ($name = $request->query('name')) {
+        $query->whereLike('name', "%{$name}%");
     }
 
     // اعمال مرتب‌سازی
@@ -56,7 +58,7 @@ $app->get('/users', function (Request $request) use ($app) {
 });
 
 // دریافت اطلاعات یک کاربر
-$app->get('/users/{id}', function (Request $request) use ($app) {
+$app->get('/users/{id}', function (Request $request) use ($app): array {
     $id = $request->param('id');
 
     $user = $app->db()->table('users')
@@ -64,19 +66,19 @@ $app->get('/users/{id}', function (Request $request) use ($app) {
         ->first();
 
     if (!$user) {
-        throw new \PHLask\Exceptions\HttpException(404, 'کاربر یافت نشد');
+        throw new HttpException(404, 'کاربر یافت نشد');
     }
 
     return $user;
 });
 
 // ایجاد کاربر جدید
-$app->post('/users', function (Request $request) use ($app) {
+$app->post('/users', function (Request $request) use ($app): array {
     $data = $request->all();
 
     // اعتبارسنجی داده‌ها
     if (empty($data['name']) || empty($data['email'])) {
-        throw new \PHLask\Exceptions\HttpException(400, 'نام و ایمیل الزامی هستند');
+        throw new HttpException(400, 'نام و ایمیل الزامی هستند');
     }
 
     // درج کاربر جدید
@@ -89,7 +91,7 @@ $app->post('/users', function (Request $request) use ($app) {
 });
 
 // به‌روزرسانی کاربر
-$app->put('/users/{id}', function (Request $request) use ($app) {
+$app->put('/users/{id}', function (Request $request) use ($app): array {
     $id = $request->param('id');
     $data = $request->all();
 
@@ -104,7 +106,7 @@ $app->put('/users/{id}', function (Request $request) use ($app) {
 });
 
 // حذف کاربر
-$app->delete('/users/{id}', function (Request $request) use ($app) {
+$app->delete('/users/{id}', function (Request $request) use ($app): array {
     $id = $request->param('id');
 
     $app->db()->table('users')
@@ -113,6 +115,33 @@ $app->delete('/users/{id}', function (Request $request) use ($app) {
 
     return [
         'message' => 'کاربر با موفقیت حذف شد'
+    ];
+});
+
+// مدیریت خطاها
+$app->errorHandler(404, function (\Throwable $error) {
+    return [
+        'error' => 'Not Found',
+        'message' => $error?->getMessage() ?? 'منبع درخواستی یافت نشد',
+    ];
+});
+
+$app->errorHandler(400, function (\Throwable $error) {
+    return [
+        'error' => 'Bad Request',
+        'message' => $error?->getMessage() ?? 'پارامترهای درخواست نامعتبر است',
+    ];
+});
+
+$app->errorHandler(500, function (\Throwable $error) {
+    return [
+        'error' => 'Internal Server Error',
+        'message' => $error?->getMessage() ?? 'خطای داخلی سرور',
+        'details' => $_ENV['APP_DEBUG'] ?? false ? [
+            'file' => $error?->getFile(),
+            'line' => $error?->getLine(),
+            'trace' => $error?->getTraceAsString(),
+        ] : null,
     ];
 });
 

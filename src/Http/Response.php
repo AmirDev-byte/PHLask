@@ -13,7 +13,7 @@ use Psr\Http\Message\StreamInterface;
 class Response implements ResponseInterface
 {
     /**
-     * @var array لیست توضیحات وضعیت HTTP استاندارد
+     * @var array<int, string> لیست توضیحات وضعیت HTTP استاندارد
      */
     private const PHRASES = [
         100 => 'Continue',
@@ -64,22 +64,27 @@ class Response implements ResponseInterface
         505 => 'HTTP Version Not Supported',
         511 => 'Network Authentication Required',
     ];
+
     /**
      * @var string نسخه پروتکل HTTP
      */
     private string $protocolVersion = '1.1';
+
     /**
-     * @var array هدرهای پاسخ
+     * @var array<string, array<int, string>> هدرهای پاسخ
      */
     private array $headers = [];
+
     /**
      * @var StreamInterface بدنه پاسخ
      */
     private StreamInterface $body;
+
     /**
      * @var int کد وضعیت HTTP
      */
     private int $statusCode;
+
     /**
      * @var string توضیح وضعیت HTTP
      */
@@ -89,7 +94,7 @@ class Response implements ResponseInterface
      * سازنده کلاس Response
      *
      * @param int $statusCode کد وضعیت
-     * @param array $headers هدرها
+     * @param array<string, array<int, string>|string> $headers هدرها
      * @param StreamInterface|null $body بدنه
      * @param string $version نسخه پروتکل
      * @param string $reasonPhrase توضیح وضعیت
@@ -103,12 +108,17 @@ class Response implements ResponseInterface
     )
     {
         $this->statusCode = $statusCode;
-        $this->headers = $headers;
+
+        // نرمال‌سازی هدرها
+        foreach ($headers as $name => $value) {
+            $this->headers[$name] = is_array($value) ? $value : [$value];
+        }
+
         $this->body = $body ?? new Stream(fopen('php://temp', 'r+'));
         $this->protocolVersion = $version;
         $this->reasonPhrase = $reasonPhrase;
 
-        if (empty($this->reasonPhrase) && isset(self::PHRASES[$statusCode])) {
+        if ($this->reasonPhrase === '' && isset(self::PHRASES[$statusCode])) {
             $this->reasonPhrase = self::PHRASES[$statusCode];
         }
     }
@@ -117,12 +127,11 @@ class Response implements ResponseInterface
      * تنظیم پاسخ به صورت JSON
      *
      * @param mixed $data داده
-     * @return Response
      */
-    public function json($data): Response
+    public function json(mixed $data): self
     {
         $body = new Stream(fopen('php://temp', 'r+'));
-        $body->write(json_encode($data, JSON_UNESCAPED_UNICODE));
+        $body->write(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
 
         return $this
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
@@ -153,9 +162,8 @@ class Response implements ResponseInterface
      * تنظیم پاسخ به صورت متنی
      *
      * @param string $text متن
-     * @return Response
      */
-    public function text(string $text): Response
+    public function text(string $text): self
     {
         $body = new Stream(fopen('php://temp', 'r+'));
         $body->write($text);
@@ -169,9 +177,8 @@ class Response implements ResponseInterface
      * تنظیم پاسخ به صورت HTML
      *
      * @param string $html کد HTML
-     * @return Response
      */
-    public function html(string $html): Response
+    public function html(string $html): self
     {
         $body = new Stream(fopen('php://temp', 'r+'));
         $body->write($html);
@@ -188,9 +195,8 @@ class Response implements ResponseInterface
      *
      * @param string $url آدرس مقصد
      * @param int $statusCode کد وضعیت (پیش‌فرض 302)
-     * @return Response
      */
-    public function redirect(string $url, int $statusCode = 302): Response
+    public function redirect(string $url, int $statusCode = 302): self
     {
         return $this
             ->withStatus($statusCode)
@@ -218,8 +224,6 @@ class Response implements ResponseInterface
 
     /**
      * ارسال پاسخ به کاربر
-     *
-     * @return void
      */
     public function send(): void
     {
@@ -233,7 +237,6 @@ class Response implements ResponseInterface
 
         // تنظیم هدرهای اضافی
         foreach ($this->headers as $name => $values) {
-            $values = is_array($values) ? $values : [$values];
             foreach ($values as $value) {
                 header(sprintf('%s: %s', $name, $value), false);
             }
@@ -300,7 +303,7 @@ class Response implements ResponseInterface
         $name = strtolower($name);
         foreach ($this->headers as $key => $value) {
             if (strtolower($key) === $name) {
-                return is_array($value) ? $value : [$value];
+                return $value;
             }
         }
         return [];
@@ -317,16 +320,16 @@ class Response implements ResponseInterface
 
         $clone = clone $this;
         $values = $this->getHeader($name);
-        $values = array_merge($values, is_array($value) ? $value : [$value]);
+        $newValues = array_merge($values, is_array($value) ? $value : [$value]);
 
         foreach ($clone->headers as $key => $existingValue) {
             if (strtolower($key) === strtolower($name)) {
-                $clone->headers[$key] = $values;
+                $clone->headers[$key] = $newValues;
                 return $clone;
             }
         }
 
-        $clone->headers[$name] = $values;
+        $clone->headers[$name] = $newValues;
         return $clone;
     }
 

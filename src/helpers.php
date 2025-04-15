@@ -11,7 +11,7 @@ if (!function_exists('env')) {
      * @param mixed $default مقدار پیش‌فرض
      * @return mixed
      */
-    function env(string $key, $default = null)
+    function env(string $key, mixed $default = null): mixed
     {
         $value = getenv($key);
 
@@ -19,22 +19,13 @@ if (!function_exists('env')) {
             return $default;
         }
 
-        switch (strtolower($value)) {
-            case 'true':
-            case '(true)':
-                return true;
-            case 'false':
-            case '(false)':
-                return false;
-            case 'null':
-            case '(null)':
-                return null;
-            case 'empty':
-            case '(empty)':
-                return '';
-        }
-
-        return $value;
+        return match (strtolower($value)) {
+            'true', '(true)' => true,
+            'false', '(false)' => false,
+            'null', '(null)' => null,
+            'empty', '(empty)' => '',
+            default => $value
+        };
     }
 }
 
@@ -43,7 +34,7 @@ if (!function_exists('view')) {
      * نمایش یک قالب
      *
      * @param string $template نام قالب
-     * @param array $data داده‌های قالب
+     * @param array<string, mixed> $data داده‌های قالب
      * @return string
      */
     function view(string $template, array $data = []): string
@@ -59,7 +50,7 @@ if (!function_exists('view')) {
 
         ob_start();
         include $templatePath;
-        return ob_get_clean();
+        return ob_get_clean() ?: '';
     }
 }
 
@@ -81,8 +72,6 @@ if (!function_exists('redirect')) {
 if (!function_exists('app')) {
     /**
      * دریافت نمونه برنامه
-     *
-     * @return \PHLask\App
      */
     function app(): \PHLask\App
     {
@@ -93,8 +82,6 @@ if (!function_exists('app')) {
 if (!function_exists('db')) {
     /**
      * دریافت اتصال پایگاه داده
-     *
-     * @return \PHLask\Database\Connection
      */
     function db(): \PHLask\Database\Connection
     {
